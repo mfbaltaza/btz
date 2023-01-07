@@ -1,16 +1,24 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Wrapper from "../components/Wrapper";
-// import Header from "../components/Header.astro";
+import Badge from "../components/Badge.astro";
+import Header from "../components/Header.astro";
 import Hero from "../components/Hero.astro";
+import Stack from "../components/Stack.astro";
+import Profile from "../components/Profile.astro";
+import Contact from "../components/Contact.astro";
+import Footer from "../components/Footer.astro";
 ---
 
 <Layout title="Welcome to Astro.">
-  <!-- <Wrapper>
-    <Header />
-  </Wrapper> -->
   <Wrapper>
+    <Header />
     <Hero />
+    <Profile />
+    <Stack />
+    <Badge />
+    <Contact />
+    <Footer />
   </Wrapper>
 </Layout>
 

@@ -1,18 +1,31 @@
 ---
-const headerImgUrl = "https://i.imgur.com/qIufhof.png";
+const headerImgUrl =
+  "https://pbs.twimg.com/media/FOJODC4WYAEEFwg?format=png&name=900x900";
 ---
 
 <main
-  class="grid lg:grid-cols-2 place-items-center pt-16 pb-8 md:pt-12 md:pb-24"
+  class="grid lg:grid-cols-2 place-items-center pt-16 pb-8 2xl:pt-12 md:pt-0 md:pb-24 gap-8"
 >
   <div>
     <h1
       class="text-5xl lg:text-6xl xl:text-7xl font-extrabold lg:tracking-tight xl:tracking-tighter"
     >
-      Just figuring stuff out
+      Developing the cool, nice stuff
     </h1>
+    <p class="text-lg mt-4 text-slate-600 max-w-xl">
+      I've worked professionally with multiple main JavaScript frameworks like
+      React.js and Vue.js<wbr /> taking an active approach to problem-solving and
+      learning quickly when needed.
+    </p>
   </div>
   <div class="py-6 md:order-1 hidden md:block">
-    <img alt="Safety Cones" src={headerImgUrl} />
+    <img class="hero-img rounded-xl" alt="Safety Cones" src={headerImgUrl} />
   </div>
 </main>
+
+<style>
+  .hero-img {
+    box-shadow: -5px -5px 9px rgba(255, 255, 255, 0.45),
+      5px 5px 9px rgba(94, 104, 121, 0.3);
+  }
+</style>
