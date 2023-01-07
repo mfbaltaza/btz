@@ -1,12 +1,32 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import Layout from "../layouts/Layout.astro";
+import Wrapper from "../components/Wrapper";
+// import Header from "../components/Header.astro";
+
+const headerImgUrl =
+  "https://i.imgur.com/qIufhof.png";
 ---
 
 <Layout title="Welcome to Astro.">
-	<main>
-		<p>Wow so much fun</p>
-	</main>
+  <!-- <Wrapper>
+    <Header />
+  </Wrapper> -->
+  <Wrapper>
+    <main
+      class="grid lg:grid-cols-2 place-items-center pt-16 pb-8 md:pt-12 md:pb-24"
+    >
+      <div>
+        <h1
+          class="text-5xl lg:text-6xl xl:text-7xl font-extrabold lg:tracking-tight xl:tracking-tighter"
+        >
+          Just figuring stuff out
+        </h1>
+      </div>
+      <div class="py-6 md:order-1 hidden md:block">
+        <img src={headerImgUrl} />
+      </div>
+    </main>
+  </Wrapper>
 </Layout>
 
-<style>
-</style>
+<style></style>
