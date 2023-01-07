@@ -1,6 +1,8 @@
 ---
 const headerImgUrl =
   "https://pbs.twimg.com/media/FOJODC4WYAEEFwg?format=png&name=900x900";
+
+import { Picture } from "@astrojs/image/components";
 ---
 
 <main
@@ -19,7 +21,17 @@ const headerImgUrl =
     </p>
   </div>
   <div class="py-6 md:order-1 hidden md:block">
-    <img class="hero-img rounded-xl" alt="Safety Cones" src={headerImgUrl} />
+    <Picture
+      class="hero-img rounded-xl"
+      src={headerImgUrl}
+      alt="Safety Cones"
+      widths={[600, 800, 1200]}
+      aspectRatio="1:1"
+      sizes="(max-width: 800px) 100vw, 620px"
+      loading="eager"
+      format="avif"
+    />
+    <!-- <img class="hero-img rounded-xl" alt="Safety Cones" src={headerImgUrl} /> -->
   </div>
 </main>
 
