@@ -1,7 +1,7 @@
-# Built with [Astro](https://astro.build)
+# BTZ 
 ## 🚀 Project Structure
-
-Inside this Astro project, you'll see the following folders and files (NEEDS UPDATE):
+Built with [Astro](https://astro.build)
+Inside this project, you'll see the following folders and files (NEEDS UPDATE):
 
 ```
 /
