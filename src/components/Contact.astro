@@ -14,7 +14,9 @@ const formAccessKey = import.meta.env.FORM_ACCESS_KEY;
       </p>
       <div class="mt-5">
         <div class="flex items-center mt-2 space-x-2 text-gray-600">
-          <a href="mailto:araujogreydiego@gmail.com">araujogreydiego@gmail.com</a>
+          <a href="mailto:araujogreydiego@gmail.com"
+            >araujogreydiego@gmail.com</a
+          >
         </div><div class="flex items-center mt-2 space-x-2 text-gray-600">
           <a href="tel:+1 (987) 4587 899">+58 (412) 806 7650</a>
         </div>
@@ -95,7 +97,7 @@ const formAccessKey = import.meta.env.FORM_ACCESS_KEY;
         <div id="result" class="mt-3 text-center astro-IGV6DBRQ"></div>
       </form>
 
-      <script>
+      <script is:inline>
         const form = document.getElementById("form");
         const result = document.getElementById("result");
 
@@ -111,7 +113,7 @@ const formAccessKey = import.meta.env.FORM_ACCESS_KEY;
           const json = JSON.stringify(object);
 
           if (result) {
-            result.innerHTML = "Sending...";            
+            result.innerHTML = "Sending...";
           }
 
           fetch("https://api.web3forms.com/submit", {
