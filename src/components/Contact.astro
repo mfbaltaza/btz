@@ -1,3 +1,7 @@
+---
+const formAccessKey = import.meta.env.FORM_ACCESS_KEY;
+---
+
 <div id="contact" class="max-w-screen-xl mx-auto my-24 px-5">
   <div class="mt-16 text-center">
     <h1 class="text-4xl lg:text-5xl font-bold lg:tracking-tight">Contact</h1>
@@ -5,22 +9,18 @@
   </div><div class="grid md:grid-cols-2 gap-10 mx-auto max-w-4xl mt-16">
     <div>
       <h2 class="font-medium text-2xl text-gray-800">Contact me</h2>
-      <p class="text-lg leading-relaxed text-slate-500 mt-3">
+      <p class="text-lg leading-relaxed text-slate-700 mt-3">
         Have something to say? We are here to help. Fill up the form.
       </p>
       <div class="mt-5">
         <div class="flex items-center mt-2 space-x-2 text-gray-600">
-          <a href="mailto:hello@astroshipstarter.com"
-            >hello@mail.com</a
-          >
+          <a href="mailto:araujogreydiego@gmail.com">araujogreydiego@gmail.com</a>
         </div><div class="flex items-center mt-2 space-x-2 text-gray-600">
-          <a href="tel:+1 (987) 4587 899">+1 (123) 4567 899</a>
+          <a href="tel:+1 (987) 4587 899">+58 (412) 806 7650</a>
         </div>
       </div>
     </div>
     <div>
-      <!-- To make this contact form work, create your free access key from https://web3forms.com/
-     Then you will get all form submissions in your email inbox. -->
       <form
         action="https://api.web3forms.com/submit"
         method="POST"
@@ -31,10 +31,9 @@
         <input
           type="hidden"
           name="access_key"
-          value="YOUR_ACCESS_KEY_HERE"
+          value={formAccessKey}
           class="astro-IGV6DBRQ"
         />
-        <!-- Create your free access key from https://web3forms.com/ -->
         <input
           type="checkbox"
           class="hidden astro-IGV6DBRQ"
@@ -100,7 +99,7 @@
         const form = document.getElementById("form");
         const result = document.getElementById("result");
 
-        form.addEventListener("submit", function (e) {
+        form?.addEventListener("submit", function (e) {
           e.preventDefault();
           form.classList.add("was-validated");
           if (!form.checkValidity()) {
@@ -111,7 +110,9 @@
           const object = Object.fromEntries(formData);
           const json = JSON.stringify(object);
 
-          result.innerHTML = "Sending...";
+          if (result) {
+            result.innerHTML = "Sending...";            
+          }
 
           fetch("https://api.web3forms.com/submit", {
             method: "POST",
@@ -124,23 +125,31 @@
             .then(async (response) => {
               let json = await response.json();
               if (response.status == 200) {
-                result.classList.add("text-green-500");
-                result.innerHTML = json.message;
+                result?.classList.add("text-green-500");
+                if (result) {
+                  result.innerHTML = json.message;
+                }
               } else {
                 console.log(response);
-                result.classList.add("text-red-500");
-                result.innerHTML = json.message;
+                result?.classList.add("text-red-500");
+                if (result) {
+                  result.innerHTML = json.message;
+                }
               }
             })
             .catch((error) => {
               console.log(error);
-              result.innerHTML = "Something went wrong!";
+              if (result) {
+                result.innerHTML = "Something went wrong!";
+              }
             })
             .then(function () {
-              form.reset();
-              form.classList.remove("was-validated");
+              form?.reset();
+              form?.classList.remove("was-validated");
               setTimeout(() => {
-                result.style.display = "none";
+                if (result) {
+                  result.style.display = "none";
+                }
               }, 5000);
             });
         });
