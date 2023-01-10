@@ -2,6 +2,10 @@
 ## 🚀 Project Structure
 Built with [Astro](https://astro.build)
 
+[TODO]
+- Adding a CV Download Button
+- Dark mode
+
 Inside this project, you'll see the following folders and files (NEEDS UPDATE):
 
 ```

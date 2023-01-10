@@ -1,6 +1,5 @@
 ---
-const headerImgUrl =
-  "https://pbs.twimg.com/media/FOJODC4WYAEEFwg?format=png&name=900x900";
+import headerImg from '../../public/hero-setup.png'
 
 import { Picture } from "@astrojs/image/components";
 ---
@@ -23,7 +22,7 @@ import { Picture } from "@astrojs/image/components";
   <div class="py-6 md:order-1 hidden md:block">
     <Picture
       class="hero-img rounded-xl"
-      src={headerImgUrl}
+      src={headerImg}
       alt="Safety Cones"
       widths={[600, 800, 1200]}
       height="900"
