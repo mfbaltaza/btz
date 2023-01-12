@@ -1,5 +1,6 @@
 ---
 import { Picture } from "@astrojs/image/components";
+import { Icon } from "astro-icon";
 ---
 
 <main
@@ -16,6 +17,26 @@ import { Picture } from "@astrojs/image/components";
       React.js and Vue.js<wbr /> taking an active approach to problem-solving and
       learning quickly when needed.
     </p>
+    <div class="mt-6 flex flex-col sm:flex-row gap-3">
+      <a
+        href="https://docs.google.com/document/d/1sBS9OMYJSoCZlR_wFz9S3FTkjt8EM7VAZSxkmzj1tfc/edit?usp=sharing"
+        target="_blank"
+        rel="noopener"
+        class="rounded text-center transition focus-visible:ring-2 ring-offset-2 ring-gray-200 px-5 py-2.5 bg-black text-white hover:bg-gray-800 border-2 border-transparent flex gap-1 items-center justify-center"
+      >
+        Download CV
+        <Icon class="text-white w-5 h-5" name="bx:bxs-cloud-download" />
+      </a>
+      <a
+        href="https://linkedin.com/in/baltaza"
+        rel="noopener"
+        target="_blank"
+        class="rounded text-center transition focus-visible:ring-2 ring-offset-2 ring-gray-200 px-5 py-2.5 bg-white border-2 border-black hover:bg-gray-100 text-black flex gap-1 items-center justify-center"
+      >
+        LinkedIn
+        <Icon class="text-black w-5 h-5" name="bx:bxl-linkedin-square" />
+      </a>
+    </div>
   </div>
   <div class="py-6 md:order-1 hidden md:block">
     <Picture
