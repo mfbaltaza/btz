@@ -1,5 +1,4 @@
 ---
-import { Picture } from "@astrojs/image/components";
 import { Icon } from "astro-icon";
 ---
 
@@ -39,19 +38,13 @@ import { Icon } from "astro-icon";
     </div>
   </div>
   <div class="py-6 md:order-1 hidden md:block">
-    <Picture
+    <img
       class="hero-img rounded-xl"
-      src="/hero-setup.png"
-      alt="Safety Cones"
-      widths={[700, 900]}
+      src="/hero-setup-min.png"
+      alt="Work zone render"
       height="900"
       width="900"
-      aspectRatio="1:1"
-      sizes="(max-width: 800px) 100vw, 620px"
-      loading="eager"
-      format="avif"
     />
-    <!-- <img class="hero-img rounded-xl" alt="Safety Cones" src={headerImgUrl} /> -->
   </div>
 </main>
 
