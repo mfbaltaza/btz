@@ -1,8 +1,6 @@
 ---
 import { Image } from "@astrojs/image/components";
 
-const profilePicture =
-  "https://media-exp1.licdn.com/dms/image/C4D03AQH39YVmoF7Qnw/profile-displayphoto-shrink_800_800/0/1636999429104?e=1674086400&v=beta&t=x4ptRGhQsBM5Z4Dc3gOX_mJWTFgYcJU1o7gQVMTbRFQ";
 ---
 
 <div id="about" class="max-w-screen-xl max-h-96 mx-auto my-24 px-5">
@@ -17,7 +15,7 @@ const profilePicture =
         <div class="flex flex-col items-center">
           <Image
             class="rounded-full w-28 shadow-lg hover:scale-105 transform duration-300 cursor-pointer"
-            src={profilePicture}
+            src="/pp4.jpg"
             width={128}
             height={128}
             alt="Photo of my face"
