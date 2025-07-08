@@ -22,13 +22,14 @@ import { Icon } from "astro-icon";
   gsap.from(split.words, {
     y: 100,
     autoAlpha: 0,
-    stagger: 0.05,
-    ease: 'circ.inOut'
+    stagger: 0.06,
+    ease: 'power1.inOut'
   })
   gsap.from(splitHighlight.words, {
     y: 100,
     autoAlpha: 0,
     stagger: 0.32,
+    ease: 'power1.inOut',
     delay: 0.5,
     onComplete: () => {
       let summaryElement = document.getElementsByClassName('gsap-summary')[0]
@@ -39,8 +40,9 @@ import { Icon } from "astro-icon";
         rotationX: -100,
         transformOrigin: "50% 50% -160px",
         opacity: 0,
-        ease: "power2",
-        stagger: 0.25
+        ease: "power3.out",
+        duration: 0.25,
+        stagger: 0.05
       })
     }
   })
