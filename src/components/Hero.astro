@@ -3,22 +3,22 @@ import { Icon } from "astro-icon";
 ---
 
 <main
-  class="grid lg:grid-cols-2 place-items-center pt-16 pb-8 2xl:pt-12 md:pt-0 md:pb-24 gap-8 h-screen"
+  class="grid lg:grid-cols-1 place-items-center pt-16 pb-8 2xl:pt-12 md:pt-0 md:pb-24 gap-8 h-screen"
 >
   <div>
     <h1
-      class="text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tighter text-red-800"
+      class="text-5xl lg:text-[12rem] font-extrabold tracking-tighter text-red-600 opacity-90"
     >
       Juan Araujo
     </h1>
     <h1
-      class="text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tighter"
+      class="text-5xl lg:text-6xl font-extrabold tracking-tighter"
     >
       Developing the cool, nice stuff
     </h1>
-    <p class="text-lg mt-4 text-slate-600 max-w-xl">
+    <p class="text-3xl mt-4 italic">
       I've worked professionally with multiple main JavaScript frameworks like
-      React.js and Vue.js<wbr /> taking an active approach to problem-solving and
+      <b>React.js</b> and <b>Vue.js</b><wbr /> taking an active approach to problem-solving and
       learning quickly when needed.
     </p>
     <div class="mt-6 flex flex-col sm:flex-row gap-3">
@@ -42,7 +42,7 @@ import { Icon } from "astro-icon";
       </a>
     </div>
   </div>
-  <div class="py-6 md:order-1 hidden md:block">
+  <!-- <div class="py-6 md:order-1 hidden md:block">
     <img
       class="rounded-xl"
       src="/hero-setup-min.png"
@@ -50,6 +50,6 @@ import { Icon } from "astro-icon";
       height="900"
       width="900"
     />
-  </div>
+  </div> -->
 </main>
 
