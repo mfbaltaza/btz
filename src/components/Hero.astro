@@ -22,13 +22,14 @@ import { Icon } from "astro-icon";
   gsap.from(split.words, {
     y: 100,
     autoAlpha: 0,
-    stagger: 0.05,
-    ease: 'circ.inOut'
+    stagger: 0.06,
+    ease: 'power1.inOut'
   })
   gsap.from(splitHighlight.words, {
     y: 100,
     autoAlpha: 0,
     stagger: 0.32,
+    ease: 'power1.inOut',
     delay: 0.5,
     onComplete: () => {
       let summaryElement = document.getElementsByClassName('gsap-summary')[0]
@@ -39,8 +40,9 @@ import { Icon } from "astro-icon";
         rotationX: -100,
         transformOrigin: "50% 50% -160px",
         opacity: 0,
-        ease: "power2",
-        stagger: 0.25
+        ease: "power3.out",
+        duration: 0.25,
+        stagger: 0.05
       })
     }
   })
@@ -51,16 +53,16 @@ import { Icon } from "astro-icon";
 >
   <div>
     <h1
-      class="text-5xl lg:text-[12rem] font-extrabold tracking-tighter text-red-600 opacity-90"
+      class="text-8xl lg:text-[12rem] font-extrabold tracking-tighter text-red-600 opacity-90"
     >
       Juan Araujo
     </h1>
     <h1
-      class="text-5xl lg:text-6xl font-extrabold tracking-tighter"
+      class="text-4xl lg:text-6xl font-extrabold tracking-tighter"
     >
       <span class="gsap-text ">Developing the </span><span class="gsap-highlight">cool, nice stuff</span>
     </h1>
-    <p class="gsap-summary text-3xl mt-4 italic opacity-0">
+    <p class="gsap-summary text-xl lg:text-3xl mt-4 italic opacity-0">
       I've worked professionally with multiple main JavaScript frameworks like
       <b>React.js</b> and <b>Vue.js</b><wbr /> taking an active approach to problem-solving and
       learning quickly when needed.
