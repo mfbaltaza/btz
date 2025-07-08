@@ -2,6 +2,48 @@
 import { Icon } from "astro-icon";
 ---
 
+<script>
+  import { gsap } from "gsap";
+  import { SplitText } from "gsap/SplitText";
+
+  gsap.registerPlugin(SplitText)
+
+  let split = SplitText.create(".gsap-text", {
+    type: "words"
+  })
+  let splitHighlight = SplitText.create(".gsap-highlight", {
+    type: "words"
+  })
+  let splitSummary = SplitText.create(".gsap-summary", {
+    type: "lines"
+  })
+
+
+  gsap.from(split.words, {
+    y: 100,
+    autoAlpha: 0,
+    stagger: 0.05,
+    ease: 'circ.inOut'
+  })
+  gsap.from(splitHighlight.words, {
+    y: 100,
+    autoAlpha: 0,
+    stagger: 0.44,
+    delay: 0.5,
+    onComplete: () => {
+      let summaryElement = document.getElementsByClassName('gsap-summary')[0]
+      summaryElement.classList.remove('opacity-0')
+      gsap.from(splitSummary.lines, {
+        rotationX: -100,
+        transformOrigin: "50% 50% -160px",
+        opacity: 0,
+        ease: "power2",
+        stagger: 0.25
+      })
+    }
+  })
+</script>
+
 <main
   class="grid lg:grid-cols-1 place-items-center pt-16 pb-8 2xl:pt-12 md:pt-0 md:pb-24 gap-8 h-screen"
 >
@@ -14,9 +56,9 @@ import { Icon } from "astro-icon";
     <h1
       class="text-5xl lg:text-6xl font-extrabold tracking-tighter"
     >
-      Developing the cool, nice stuff
+      <span class="gsap-text ">Developing the </span><span class="gsap-highlight">cool, nice stuff</span>
     </h1>
-    <p class="text-3xl mt-4 italic">
+    <p class="gsap-summary text-3xl mt-4 italic opacity-0">
       I've worked professionally with multiple main JavaScript frameworks like
       <b>React.js</b> and <b>Vue.js</b><wbr /> taking an active approach to problem-solving and
       learning quickly when needed.
