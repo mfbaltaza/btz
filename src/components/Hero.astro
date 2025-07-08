@@ -28,11 +28,13 @@ import { Icon } from "astro-icon";
   gsap.from(splitHighlight.words, {
     y: 100,
     autoAlpha: 0,
-    stagger: 0.44,
+    stagger: 0.32,
     delay: 0.5,
     onComplete: () => {
       let summaryElement = document.getElementsByClassName('gsap-summary')[0]
+      let buttonGroupElement = document.getElementsByClassName('button-group')[0]
       summaryElement.classList.remove('opacity-0')
+      buttonGroupElement.classList.remove('opacity-0')
       gsap.from(splitSummary.lines, {
         rotationX: -100,
         transformOrigin: "50% 50% -160px",
@@ -63,7 +65,7 @@ import { Icon } from "astro-icon";
       <b>React.js</b> and <b>Vue.js</b><wbr /> taking an active approach to problem-solving and
       learning quickly when needed.
     </p>
-    <div class="mt-6 flex flex-col sm:flex-row gap-3">
+    <div class="mt-6 flex flex-col sm:flex-row gap-3 opacity-0 transition-opacity duration-[1500ms] button-group">
       <a
         href="https://docs.google.com/document/d/1sBS9OMYJSoCZlR_wFz9S3FTkjt8EM7VAZSxkmzj1tfc/edit?usp=sharing"
         target="_blank"
