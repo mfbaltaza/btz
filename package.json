@@ -16,7 +16,6 @@
     "@astrojs/vercel": "^8.2.1",
     "@fontsource/manrope": "^4.5.12",
     "@iconify-json/bx": "^1.2.3",
-    "@iconify-json/simple-icons": "^1.2.86",
     "astro": "^5.11.0",
     "astro-icon": "^1.1.5",
     "gsap": "^3.13.0",
