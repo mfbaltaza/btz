@@ -9,10 +9,13 @@ import tailwind from "@astrojs/tailwind";
 // https://astro.build/config
 import vercel from "@astrojs/vercel";
 
+// https://astro.build/config
+import icon from "astro-icon";
+
 
 // https://astro.build/config
 export default defineConfig({
-  integrations: [preact(), tailwind()],
+  integrations: [preact(), tailwind(), icon()],
   output: "server",
   adapter: vercel()
 });
