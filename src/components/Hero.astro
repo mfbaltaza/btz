@@ -30,7 +30,7 @@ import { Icon } from "astro-icon";
     autoAlpha: 0,
     stagger: 0.32,
     ease: 'power1.inOut',
-    delay: 0.5,
+    delay: 0.1,
     onComplete: () => {
       let summaryElement = document.getElementsByClassName('gsap-summary')[0]
       let buttonGroupElement = document.getElementsByClassName('button-group')[0]
@@ -41,7 +41,7 @@ import { Icon } from "astro-icon";
         transformOrigin: "50% 50% -160px",
         opacity: 0,
         ease: "power3.out",
-        duration: 0.25,
+        duration: 0.15,
         stagger: 0.05
       })
     }
