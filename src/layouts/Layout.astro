@@ -35,6 +35,17 @@ const { title } = Astro.props;
   html {
     background-color: #f6f6f6;
   }
+  /* Shared entrance token — the single source for entry animations across the site. */
+  @keyframes enter {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
   code {
     font-family: Menlo, Monaco, Lucida Console, Liberation Mono,
       DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;

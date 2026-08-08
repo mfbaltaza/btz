@@ -16,3 +16,14 @@ const headerImgUrl = "https://i.imgur.com/qIufhof.png";
     <img alt="Safety Cones" src={headerImgUrl} />
   </div>
 </main>
+
+<style>
+  h1 {
+    animation: enter 420ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    h1 {
+      animation: none;
+    }
+  }
+</style>
