@@ -1,0 +1,639 @@
+<div
+  class="crt-webgl"
+  data-crt-webgl
+  aria-label="Three-dimensional CRT monitor"
+>
+  <canvas class="crt-webgl__canvas" data-crt-canvas aria-hidden="true"></canvas>
+  <div class="crt-webgl__screen" data-crt-screen>
+    <div class="crt-webgl__screen-content"><slot name="screen" /></div>
+  </div>
+  <div class="crt-webgl__artifacts" data-crt-artifacts aria-hidden="true">
+    <slot name="artifacts" />
+  </div>
+</div>
+
+<script>
+  import * as THREE from "three";
+  import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
+
+  const roots = document.querySelectorAll("[data-crt-webgl]");
+
+  roots.forEach((root) => {
+    const canvas = root.querySelector("[data-crt-canvas]");
+    const screenLayer = root.querySelector("[data-crt-screen]");
+    const artifactLayer = root.querySelector("[data-crt-artifacts]");
+    if (
+      !(canvas instanceof HTMLCanvasElement) ||
+      !(screenLayer instanceof HTMLElement)
+    )
+      return;
+
+    const screenContent = screenLayer.querySelector(
+      ".crt-webgl__screen-content"
+    );
+    if (screenContent instanceof HTMLElement) {
+      const distortionCopy = screenContent.cloneNode(true);
+      if (distortionCopy instanceof HTMLElement) {
+        distortionCopy.classList.add("crt-webgl__screen-content--distortion");
+        distortionCopy.setAttribute("aria-hidden", "true");
+        distortionCopy.querySelectorAll("a, button").forEach((element) => {
+          element.setAttribute("tabindex", "-1");
+        });
+        screenLayer.appendChild(distortionCopy);
+      }
+    }
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 100);
+    camera.position.set(0, 1.45, 20.5);
+    camera.lookAt(0, 1.15, 0);
+
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      alpha: true,
+      antialias: true,
+      powerPreference: "high-performance",
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.16;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    const monitor = new THREE.Group();
+    monitor.position.y = 0.35;
+    scene.add(monitor);
+
+    const bodyMaterial = new THREE.MeshStandardMaterial({
+      color: 0x73796f,
+      roughness: 0.72,
+      metalness: 0.04,
+    });
+    const edgeMaterial = new THREE.MeshStandardMaterial({
+      color: 0x4d554c,
+      roughness: 0.76,
+      metalness: 0.03,
+    });
+    const darkMaterial = new THREE.MeshStandardMaterial({
+      color: 0x252c27,
+      roughness: 0.84,
+      metalness: 0.02,
+    });
+    const rearMaterial = new THREE.MeshStandardMaterial({
+      color: 0x626960,
+      roughness: 0.79,
+      metalness: 0.02,
+    });
+
+    function roundedBox(
+      width,
+      height,
+      depth,
+      radius,
+      material,
+      position,
+      segments = 1
+    ) {
+      const mesh = new THREE.Mesh(
+        new RoundedBoxGeometry(width, height, depth, segments, radius),
+        material
+      );
+      mesh.position.set(position[0], position[1], position[2]);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      monitor.add(mesh);
+      return mesh;
+    }
+
+    // The shell remains volumetric so its body, neck, and foot read as one object.
+    roundedBox(8.7, 6.2, 4.55, 0.14, bodyMaterial, [0, 2.15, 0], 1);
+    roundedBox(7.95, 5.55, 0.44, 0.07, edgeMaterial, [0, 2.24, 2.22], 1);
+    roundedBox(6.78, 4.52, 0.34, 0.05, darkMaterial, [0, 2.43, 2.42], 1);
+
+    const screenShape = new THREE.Shape();
+    const screenWidth = 6.18;
+    const screenHeight = 3.82;
+    const screenRadius = 0.24;
+    const left = -screenWidth / 2;
+    const right = screenWidth / 2;
+    const bottom = -screenHeight / 2;
+    const top = screenHeight / 2;
+    screenShape.moveTo(left + screenRadius, bottom);
+    screenShape.lineTo(right - screenRadius, bottom);
+    screenShape.quadraticCurveTo(right, bottom, right, bottom + screenRadius);
+    screenShape.lineTo(right, top - screenRadius);
+    screenShape.quadraticCurveTo(right, top, right - screenRadius, top);
+    screenShape.lineTo(left + screenRadius, top);
+    screenShape.quadraticCurveTo(left, top, left, top - screenRadius);
+    screenShape.lineTo(left, bottom + screenRadius);
+    screenShape.quadraticCurveTo(left, bottom, left + screenRadius, bottom);
+
+    const screenGeometry = new THREE.ExtrudeGeometry(screenShape, {
+      depth: 0.22,
+      bevelEnabled: true,
+      bevelSegments: 2,
+      bevelSize: 0.06,
+      bevelThickness: 0.06,
+      curveSegments: 8,
+      steps: 1,
+    });
+    screenGeometry.translate(0, 0, -0.11);
+    const screenPositions = screenGeometry.attributes.position;
+    for (let i = 0; i < screenPositions.count; i += 1) {
+      const x = screenPositions.getX(i);
+      const y = screenPositions.getY(i);
+      const z = screenPositions.getZ(i);
+      const curve = Math.max(
+        0,
+        1 - (x / (screenWidth * 0.54)) ** 2 - (y / (screenHeight * 0.54)) ** 2
+      );
+      const frontness = THREE.MathUtils.clamp((z + 0.11) / 0.22, 0, 1);
+      screenPositions.setZ(i, z + curve * frontness * 0.08);
+    }
+    screenGeometry.computeVertexNormals();
+    const glass = new THREE.MeshPhysicalMaterial({
+      color: 0x12231d,
+      emissive: 0x07110d,
+      emissiveIntensity: 0.38,
+      roughness: 0.2,
+      metalness: 0.08,
+      clearcoat: 0.72,
+      clearcoatRoughness: 0.16,
+    });
+    const screenMesh = new THREE.Mesh(screenGeometry, glass);
+    screenMesh.position.set(0, 2.43, 2.54);
+    screenMesh.castShadow = true;
+    screenMesh.receiveShadow = true;
+    monitor.add(screenMesh);
+
+    // The control strip and physical controls give the front face depth beyond the glass.
+    roundedBox(6.7, 0.5, 0.22, 0.04, edgeMaterial, [0, 0.07, 2.42], 1);
+    const buttonMaterial = new THREE.MeshStandardMaterial({
+      color: 0x6c7168,
+      roughness: 0.48,
+      metalness: 0.08,
+    });
+    function button(x, radius, depth = 0.16) {
+      const mesh = new THREE.Mesh(
+        new THREE.CylinderGeometry(radius, radius * 1.06, depth, 24),
+        buttonMaterial
+      );
+      mesh.rotation.x = Math.PI / 2;
+      mesh.position.set(x, 0.07, 2.55);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      monitor.add(mesh);
+    }
+    button(2.42, 0.2, 0.18);
+    button(2.95, 0.13);
+    button(3.36, 0.09);
+    const power = new THREE.Mesh(
+      new THREE.SphereGeometry(0.075, 16, 10),
+      new THREE.MeshStandardMaterial({
+        color: 0x9baa78,
+        emissive: 0x637d43,
+        emissiveIntensity: 1.8,
+      })
+    );
+    power.position.set(1.92, 0.07, 2.55);
+    monitor.add(power);
+
+    // Neck and foot are overlapping solid volumes, rather than floating planes.
+    roundedBox(2.7, 1.55, 1.95, 0.08, bodyMaterial, [0, -1.06, 0], 1);
+    roundedBox(7.05, 0.78, 3.05, 0.09, bodyMaterial, [0, -1.88, 0], 1);
+    roundedBox(7.55, 0.34, 3.35, 0.05, edgeMaterial, [0, -2.43, 0.06], 1);
+
+    // Rear service panel, vents, fan and port details remain attached to the closed shell.
+    roundedBox(8, 5.45, 0.3, 0.06, rearMaterial, [0, 2.2, -2.28], 1);
+    for (let i = 0; i < 8; i += 1) {
+      roundedBox(
+        0.16,
+        2.85,
+        0.06,
+        0.01,
+        darkMaterial,
+        [-2.2 + i * 0.28, 2.38, -2.45],
+        1
+      );
+    }
+    const fan = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.68, 0.68, 0.08, 32),
+      darkMaterial
+    );
+    fan.rotation.x = Math.PI / 2;
+    fan.position.set(1.3, 1.5, -2.45);
+    fan.castShadow = true;
+    monitor.add(fan);
+    const fanRing = new THREE.Mesh(
+      new THREE.TorusGeometry(0.68, 0.06, 8, 32),
+      edgeMaterial
+    );
+    fanRing.rotation.x = Math.PI / 2;
+    fanRing.position.set(1.3, 1.5, -2.45);
+    fanRing.castShadow = true;
+    fanRing.receiveShadow = true;
+    monitor.add(fanRing);
+    roundedBox(1.1, 0.48, 0.12, 0.02, darkMaterial, [-2.25, 0.25, -2.45], 1);
+
+    const floor = new THREE.Mesh(
+      new THREE.PlaneGeometry(14, 10),
+      new THREE.ShadowMaterial({ color: 0x111711, opacity: 0.18 })
+    );
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -2.28;
+    floor.receiveShadow = true;
+    scene.add(floor);
+
+    scene.add(new THREE.HemisphereLight(0xd7e0d5, 0x303830, 1.8));
+    const key = new THREE.DirectionalLight(0xfff1dc, 2.6);
+    key.position.set(-6, 10, 9);
+    key.castShadow = true;
+    key.shadow.mapSize.set(1024, 1024);
+    key.shadow.camera.left = -8;
+    key.shadow.camera.right = 8;
+    key.shadow.camera.top = 9;
+    key.shadow.camera.bottom = -6;
+    key.shadow.normalBias = 0.025;
+    key.shadow.bias = -0.0005;
+    scene.add(key);
+    const fill = new THREE.DirectionalLight(0xc8e1d5, 1.45);
+    fill.position.set(7, 5, 9);
+    scene.add(fill);
+    const rim = new THREE.PointLight(0x7b9d88, 8, 18, 2);
+    rim.position.set(5, 4, -6);
+    scene.add(rim);
+    const screenLight = new THREE.PointLight(0x6da080, 1.8, 7, 2);
+    screenLight.position.set(0, 2.2, 4.5);
+    scene.add(screenLight);
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const orbit = {
+      yaw: -0.24,
+      pitch: 0.05,
+      targetYaw: -0.24,
+      targetPitch: 0.05,
+    };
+    const yawBounds = { min: -0.38, max: 0.08 };
+    const pitchBounds = { min: -0.2, max: 0.2 };
+    const idle = { yaw: -0.24, pitch: 0.05 };
+    let dragging = false;
+    let idleResumeAt = 0;
+    let pointerX = 0;
+    let pointerY = 0;
+    let lastTime = performance.now();
+    let frame = 0;
+    const zoomMatch = window.matchMedia(
+      "(min-width: 701px) and (hover: hover) and (pointer: fine)"
+    );
+    let zoomed = false;
+    let startX = 0;
+    let startY = 0;
+
+    function setZoomed(next) {
+      if (zoomed === next) return;
+      zoomed = next;
+      root.classList.toggle("crt-zoomed", zoomed);
+      if (zoomed) {
+        dragging = false;
+        idleResumeAt = Number.POSITIVE_INFINITY;
+      } else {
+        idleResumeAt = performance.now() + 4500;
+      }
+    }
+
+    document.addEventListener("crt:zoom", () => setZoomed(true));
+    document.addEventListener("crt:unzoom", () => setZoomed(false));
+    const screenWorldSize = { width: 6.02, height: 3.62 };
+    // Render the DOM overlay at a useful resolution before projecting it onto the glass.
+    const screenSize = { width: 960, height: 576 };
+    const screenCorners = [
+      new THREE.Vector3(
+        -screenWorldSize.width / 2,
+        screenWorldSize.height / 2,
+        0.18
+      ),
+      new THREE.Vector3(
+        screenWorldSize.width / 2,
+        screenWorldSize.height / 2,
+        0.18
+      ),
+      new THREE.Vector3(
+        screenWorldSize.width / 2,
+        -screenWorldSize.height / 2,
+        0.18
+      ),
+      new THREE.Vector3(
+        -screenWorldSize.width / 2,
+        -screenWorldSize.height / 2,
+        0.18
+      ),
+    ];
+
+    function homography(source, target) {
+      const matrix = [];
+      for (let i = 0; i < 4; i += 1) {
+        const x = source[i].x;
+        const y = source[i].y;
+        const u = target[i].x;
+        const v = target[i].y;
+        matrix.push([x, y, 1, 0, 0, 0, -x * u, -y * u, u]);
+        matrix.push([0, 0, 0, x, y, 1, -x * v, -y * v, v]);
+      }
+      for (let column = 0; column < 8; column += 1) {
+        let pivot = column;
+        for (let row = column + 1; row < 8; row += 1) {
+          if (Math.abs(matrix[row][column]) > Math.abs(matrix[pivot][column]))
+            pivot = row;
+        }
+        [matrix[column], matrix[pivot]] = [matrix[pivot], matrix[column]];
+        const divisor = matrix[column][column] || 1;
+        for (let j = column; j < 9; j += 1) matrix[column][j] /= divisor;
+        for (let row = 0; row < 8; row += 1) {
+          if (row === column) continue;
+          const factor = matrix[row][column];
+          for (let j = column; j < 9; j += 1)
+            matrix[row][j] -= factor * matrix[column][j];
+        }
+      }
+      return matrix.map((row) => row[8]).concat(1);
+    }
+
+    function projectScreen() {
+      const width = root.clientWidth;
+      const height = root.clientHeight;
+      monitor.updateMatrixWorld(true);
+      const screenWorld = screenMesh.getWorldPosition(new THREE.Vector3());
+      const normal = new THREE.Vector3(0, 0, 1).transformDirection(
+        screenMesh.matrixWorld
+      );
+      const toCamera = camera.position.clone().sub(screenWorld).normalize();
+      const facing = normal.dot(toCamera);
+      if (facing < 0.08 || width === 0 || height === 0) {
+        screenLayer.style.opacity = "0";
+        if (artifactLayer instanceof HTMLElement)
+          artifactLayer.style.opacity = "0";
+        return;
+      }
+      const projected = screenCorners.map((corner) => {
+        const point = corner.clone();
+        screenMesh.localToWorld(point);
+        point.project(camera);
+        return {
+          x: (point.x * 0.5 + 0.5) * width,
+          y: (-point.y * 0.5 + 0.5) * height,
+        };
+      });
+      const source = [
+        { x: 0, y: 0 },
+        { x: screenSize.width, y: 0 },
+        { x: screenSize.width, y: screenSize.height },
+        { x: 0, y: screenSize.height },
+      ];
+      const h = homography(source, projected);
+      const matrix = [
+        h[0],
+        h[3],
+        0,
+        h[6],
+        h[1],
+        h[4],
+        0,
+        h[7],
+        0,
+        0,
+        1,
+        0,
+        h[2],
+        h[5],
+        0,
+        1,
+      ];
+      const transform = `matrix3d(${matrix.join(",")})`;
+      screenLayer.style.width = `${screenSize.width}px`;
+      screenLayer.style.height = `${screenSize.height}px`;
+      screenLayer.style.transform = transform;
+      screenLayer.style.opacity = String(Math.min(1, facing * 3));
+      if (artifactLayer instanceof HTMLElement) {
+        artifactLayer.style.width = `${screenSize.width}px`;
+        artifactLayer.style.height = `${screenSize.height}px`;
+        artifactLayer.style.transform = transform;
+        artifactLayer.style.opacity = String(Math.min(1, facing * 3));
+      }
+    }
+
+    function resize() {
+      const width = root.clientWidth;
+      const height = root.clientHeight;
+      if (!width || !height) return;
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height, false);
+      projectScreen();
+    }
+
+    function animate(time) {
+      const delta = Math.min((time - lastTime) / 1000, 0.05);
+      lastTime = time;
+      if (!reducedMotion.matches && !dragging && time > idleResumeAt) {
+        orbit.targetYaw = THREE.MathUtils.clamp(
+          idle.yaw + Math.sin(time * 0.00042) * 0.065,
+          yawBounds.min,
+          yawBounds.max
+        );
+        orbit.targetPitch = THREE.MathUtils.clamp(
+          idle.pitch + Math.sin(time * 0.00031 + 1.2) * 0.018,
+          pitchBounds.min,
+          pitchBounds.max
+        );
+      }
+      orbit.yaw = THREE.MathUtils.damp(orbit.yaw, orbit.targetYaw, 4.5, delta);
+      orbit.pitch = THREE.MathUtils.damp(
+        orbit.pitch,
+        orbit.targetPitch,
+        4.5,
+        delta
+      );
+      monitor.rotation.set(orbit.pitch, orbit.yaw, 0);
+      if (!zoomed) {
+        renderer.render(scene, camera);
+        projectScreen();
+      }
+      frame = requestAnimationFrame(animate);
+    }
+
+    function onPointerDown(event) {
+      if (zoomed) return;
+      dragging = true;
+      idleResumeAt = performance.now() + 4500;
+      pointerX = event.clientX;
+      pointerY = event.clientY;
+      startX = event.clientX;
+      startY = event.clientY;
+      root.setPointerCapture?.(event.pointerId);
+    }
+    function onPointerMove(event) {
+      if (!dragging) return;
+      orbit.targetYaw = THREE.MathUtils.clamp(
+        orbit.targetYaw + (event.clientX - pointerX) * 0.004,
+        yawBounds.min,
+        yawBounds.max
+      );
+      orbit.targetPitch = THREE.MathUtils.clamp(
+        orbit.targetPitch + (event.clientY - pointerY) * 0.005,
+        pitchBounds.min,
+        pitchBounds.max
+      );
+      pointerX = event.clientX;
+      pointerY = event.clientY;
+    }
+    function onPointerUp(event) {
+      if (!zoomed && dragging) {
+        const moved = Math.hypot(
+          event.clientX - startX,
+          event.clientY - startY
+        );
+        if (moved < 7 && zoomMatch.matches) {
+          document.dispatchEvent(new CustomEvent("crt:zoom"));
+        }
+      }
+      dragging = false;
+      idleResumeAt = performance.now() + 4500;
+    }
+
+    const resizeObserver = new ResizeObserver(resize);
+    resizeObserver.observe(root);
+    root.addEventListener("pointerdown", onPointerDown);
+    root.addEventListener("pointermove", onPointerMove);
+    root.addEventListener("pointerup", onPointerUp);
+    root.addEventListener("pointercancel", onPointerUp);
+    reducedMotion.addEventListener?.("change", resize);
+    resize();
+    frame = requestAnimationFrame(animate);
+
+    // Astro can navigate without a full reload; clean up if this island is removed.
+    root.addEventListener(
+      "astro:unmount",
+      () => {
+        cancelAnimationFrame(frame);
+        resizeObserver.disconnect();
+        renderer.dispose();
+      },
+      { once: true }
+    );
+  });
+</script>
+
+<style>
+  .crt-webgl {
+    position: relative;
+    display: block;
+    width: min(100%, 760px);
+    min-width: 220px;
+    aspect-ratio: 1.2;
+    contain: layout;
+    overflow: visible;
+    touch-action: none;
+    pointer-events: auto;
+    cursor: grab;
+    isolation: isolate;
+    transition: opacity 240ms ease;
+  }
+
+  .crt-webgl:active {
+    cursor: grabbing;
+  }
+
+  .crt-webgl.crt-zoomed,
+  .crt-webgl.crt-zoomed:active {
+    cursor: default;
+    opacity: 0;
+  }
+
+  .crt-webgl__canvas {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .crt-webgl__screen,
+  .crt-webgl__artifacts {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: 0 0;
+    will-change: transform, opacity;
+  }
+
+  .crt-webgl__screen {
+    z-index: 2;
+    overflow: hidden;
+    border-radius: 4.25%;
+    opacity: 0;
+    pointer-events: auto;
+    isolation: isolate;
+  }
+
+  .crt-webgl__screen-content {
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  .crt-webgl__screen-content--distortion {
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    overflow: hidden;
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% 32%,
+      91% 34%,
+      79% 31%,
+      66% 35%,
+      53% 32%,
+      40% 35%,
+      27% 31%,
+      14% 34%,
+      0 32%
+    );
+    filter: url("#crt-screen-distortion");
+    opacity: 0.34;
+    pointer-events: none;
+    mix-blend-mode: normal;
+  }
+
+  .crt-webgl__screen-content > :global(*) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .crt-webgl__artifacts {
+    z-index: 4;
+    pointer-events: none;
+  }
+
+  .crt-webgl__artifacts > :global(*) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  @media (max-width: 520px) {
+    .crt-webgl {
+      width: 100%;
+      aspect-ratio: 1.06;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .crt-webgl {
+      touch-action: auto;
+      transition: none;
+    }
+  }
+</style>

@@ -1,0 +1,435 @@
+<div class="crt-artifacts" aria-hidden="true">
+  <svg
+    class="crt-artifacts__svg"
+    viewBox="0 0 100 100"
+    preserveAspectRatio="none"
+    focusable="false"
+    role="presentation"
+  >
+    <defs>
+      <linearGradient id="crt-signal-wash" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#c6d1da" stop-opacity=".06"></stop>
+        <stop offset=".28" stop-color="#aebbc5" stop-opacity=".04"></stop>
+        <stop offset=".55" stop-color="#edf1e8" stop-opacity=".025"></stop>
+        <stop offset=".72" stop-color="#9daea9" stop-opacity=".045"></stop>
+        <stop offset="1" stop-color="#748592" stop-opacity=".07"></stop>
+      </linearGradient>
+      <linearGradient id="crt-tear-blue" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#8da1aa" stop-opacity="0"></stop>
+        <stop offset=".18" stop-color="#aebdc3" stop-opacity=".2"></stop>
+        <stop offset=".52" stop-color="#d2d6d3" stop-opacity=".13"></stop>
+        <stop offset=".82" stop-color="#95aab1" stop-opacity=".18"></stop>
+        <stop offset="1" stop-color="#8da1aa" stop-opacity="0"></stop>
+      </linearGradient>
+      <linearGradient id="crt-tear-red" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#a59e9c" stop-opacity="0"></stop>
+        <stop offset=".22" stop-color="#c0b9b5" stop-opacity=".14"></stop>
+        <stop offset=".58" stop-color="#d5cec4" stop-opacity=".11"></stop>
+        <stop offset=".86" stop-color="#b0a7a5" stop-opacity=".16"></stop>
+        <stop offset="1" stop-color="#a59e9c" stop-opacity="0"></stop>
+      </linearGradient>
+      <linearGradient id="crt-tear-amber" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#aaa796" stop-opacity="0"></stop>
+        <stop offset=".25" stop-color="#c3c0a9" stop-opacity=".12"></stop>
+        <stop offset=".56" stop-color="#dedbc5" stop-opacity=".15"></stop>
+        <stop offset=".84" stop-color="#b6b09d" stop-opacity=".1"></stop>
+        <stop offset="1" stop-color="#aaa796" stop-opacity="0"></stop>
+      </linearGradient>
+      <linearGradient id="crt-top-interference" x1="0" y1="0" x2="1" y2="0.2">
+        <stop offset="0" stop-color="#b9c8d1" stop-opacity=".2"></stop>
+        <stop offset=".2" stop-color="#d5d8d6" stop-opacity=".12"></stop>
+        <stop offset=".4" stop-color="#a9b9c0" stop-opacity=".18"></stop>
+        <stop offset=".58" stop-color="#d7d8ce" stop-opacity=".2"></stop>
+        <stop offset=".78" stop-color="#97a9b1" stop-opacity=".15"></stop>
+        <stop offset="1" stop-color="#c3cfd1" stop-opacity=".16"></stop>
+      </linearGradient>
+      <linearGradient id="crt-top-shadow" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#1a2630" stop-opacity=".2"></stop>
+        <stop offset=".45" stop-color="#283944" stop-opacity=".08"></stop>
+        <stop offset="1" stop-color="#151d23" stop-opacity="0"></stop>
+      </linearGradient>
+      <radialGradient id="crt-vignette" cx="50%" cy="48%" r="71%">
+        <stop offset="0" stop-color="#071126" stop-opacity="0"></stop>
+        <stop offset=".62" stop-color="#071126" stop-opacity=".02"></stop>
+        <stop offset=".88" stop-color="#020716" stop-opacity=".27"></stop>
+        <stop offset="1" stop-color="#01030b" stop-opacity=".68"></stop>
+      </radialGradient>
+      <pattern id="crt-scanlines" width="100" height="3" patternUnits="userSpaceOnUse">
+        <rect width="100" height="1" fill="#07112b" opacity=".28"></rect>
+        <rect y="1.3" width="100" height=".34" fill="#f0f4ff" opacity=".08"></rect>
+      </pattern>
+      <pattern id="crt-phosphor" width="3" height="3" patternUnits="userSpaceOnUse">
+        <rect width="1" height="3" fill="#b8bcb6" opacity=".05"></rect>
+        <rect x="1" width="1" height="3" fill="#c2c8c0" opacity=".04"></rect>
+        <rect x="2" width="1" height="3" fill="#aebcc0" opacity=".06"></rect>
+      </pattern>
+      <filter id="crt-screen-distortion" x="-10%" y="-12%" width="120%" height="124%" color-interpolation-filters="sRGB">
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency=".012 .095"
+          numOctaves="2"
+          seed="17"
+          result="signal-noise"
+        >
+          <animate
+            data-crt-signal-motion
+            attributeName="baseFrequency"
+            values=".012 .095;.02 .13;.008 .08;.012 .095"
+            dur="13s"
+            begin="indefinite"
+            repeatCount="indefinite"
+          ></animate>
+        </feTurbulence>
+        <feDisplacementMap
+          in="SourceGraphic"
+          in2="signal-noise"
+          scale="7.2"
+          xChannelSelector="R"
+          yChannelSelector="G"
+        ></feDisplacementMap>
+      </filter>
+      <filter id="crt-noise" x="-5%" y="-5%" width="110%" height="110%">
+        <feTurbulence type="fractalNoise" baseFrequency=".56" numOctaves="2" seed="31" result="grain"></feTurbulence>
+        <feColorMatrix
+          in="grain"
+          type="matrix"
+          values="1 0 0 0 -.42  0 1 0 0 -.42  0 0 1 0 -.32  0 0 0 .32 0"
+        ></feColorMatrix>
+      </filter>
+      <filter id="crt-soft-bloom" x="-25%" y="-80%" width="150%" height="260%">
+        <feGaussianBlur stdDeviation="1.1"></feGaussianBlur>
+      </filter>
+      <filter id="crt-line-bloom" x="-30%" y="-100%" width="160%" height="300%">
+        <feGaussianBlur stdDeviation=".48"></feGaussianBlur>
+      </filter>
+      <filter id="crt-top-warp" x="-12%" y="-35%" width="124%" height="170%">
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency=".018 .16"
+          numOctaves="2"
+          seed="23"
+          result="top-noise"
+        >
+          <animate
+            data-crt-signal-motion
+            attributeName="baseFrequency"
+            values=".018 .16;.028 .21;.012 .13;.018 .16"
+            dur="8.5s"
+            begin="indefinite"
+            repeatCount="indefinite"
+          ></animate>
+        </feTurbulence>
+        <feDisplacementMap
+          in="SourceGraphic"
+          in2="top-noise"
+          scale="5.5"
+          xChannelSelector="R"
+          yChannelSelector="G"
+        ></feDisplacementMap>
+      </filter>
+    </defs>
+
+    <!-- Uneven phosphor wash, close to the blue/magenta cast of an old tube. -->
+    <rect class="crt-artifacts__wash" x="-4" y="-4" width="108" height="108" fill="url(#crt-signal-wash)"></rect>
+
+    <!-- The upper third is where a weak CRT signal folds and blooms first. -->
+    <g class="crt-artifacts__top-interference" filter="url(#crt-top-warp)">
+      <path
+        class="crt-artifacts__top-field"
+        d="M-6 1c15 3 23-2 37 1 16 3 23 0 37 2 13 2 22-2 39 1l-1 18c-15-3-25 2-39-1-16-3-24 2-38-1-14-3-22 2-36-1Z"
+        fill="url(#crt-top-interference)"
+      ></path>
+      <path
+        class="crt-artifacts__top-shadow"
+        d="M-6 3c17 2 25-1 39 2 14 3 24-2 37 1 14 3 23-1 37 1v19c-17-2-26 2-40-1-15-3-23 2-38-1-14-3-22 1-35-1Z"
+        fill="url(#crt-top-shadow)"
+      ></path>
+      <path
+        class="crt-artifacts__top-mass crt-artifacts__top-mass--violet"
+        d="M-6 5C7 1 17 8 29 5S51 1 64 5s24-2 41-1v11c-14-2-25 5-39 1s-24 4-38 0S9 18-6 16Z"
+      >
+        <animate
+          data-crt-signal-motion
+          attributeName="d"
+          dur="7.8s"
+          begin="indefinite"
+          repeatCount="indefinite"
+          values="M-6 5C7 1 17 8 29 5S51 1 64 5s24-2 41-1v11c-14-2-25 5-39 1s-24 4-38 0S9 18-6 16Z;M-6 8C8 12 17 1 31 6s22 7 35 1 24-6 39 2v10c-16-4-26 3-40-1s-23-1-36 2S8 17-6 20Z;M-6 3C9 0 16 9 28 3s23 2 36 5 25-5 41-2v12c-15-1-25 3-39-1s-24 6-38 1S8 14-6 17Z;M-6 5C7 1 17 8 29 5S51 1 64 5s24-2 41-1v11c-14-2-25 5-39 1s-24 4-38 0S9 18-6 16Z"
+        ></animate>
+      </path>
+      <path
+        class="crt-artifacts__top-mass crt-artifacts__top-mass--amber"
+        d="M21 4c9-3 17 4 27 3s17-5 27-1 15 2 22 5l-1 12c-10-4-18 1-28-2s-18 5-28 1-16-2-21 0Z"
+      >
+        <animate
+          data-crt-signal-motion
+          attributeName="d"
+          dur="6.4s"
+          begin="indefinite"
+          repeatCount="indefinite"
+          values="M21 4c9-3 17 4 27 3s17-5 27-1 15 2 22 5l-1 12c-10-4-18 1-28-2s-18 5-28 1-16-2-21 0Z;M19 8c11-5 17 0 27-2s18 7 27 3 15-2 25 4l-2 10c-10-2-18 4-28 0s-18 1-27-2-16 3-22 1Z;M24 2c8 2 16 0 25 5s18-4 27 0 15 5 21 2v14c-10 2-17-2-27-1s-18 4-28-1-16 1-21 2Z;M21 4c9-3 17 4 27 3s17-5 27-1 15 2 22 5l-1 12c-10-4-18 1-28-2s-18 5-28 1-16-2-21 0Z"
+        ></animate>
+      </path>
+      <path
+        class="crt-artifacts__top-mass crt-artifacts__top-mass--blue"
+        d="M-5 12c11 1 18-4 29-1s18 0 27 4 17-2 27 0 18 0 28 3v10c-13-2-20 2-31-1s-18 3-28-1-18 2-28-1-17 1-24-1Z"
+      >
+        <animate
+          data-crt-signal-motion
+          attributeName="d"
+          dur="9.1s"
+          begin="indefinite"
+          repeatCount="indefinite"
+          values="M-5 12c11 1 18-4 29-1s18 0 27 4 17-2 27 0 18 0 28 3v10c-13-2-20 2-31-1s-18 3-28-1-18 2-28-1-17 1-24-1Z;M-5 9c12 5 18 0 29 2s18-3 27 1 17 4 27-1 18 2 28 0v12c-12 1-21-3-31 1s-18-1-28-2-18 3-28-1-17 2-24 0Z;M-5 15c12-2 18-1 29-3s18 5 27 1 17-3 27 1 18-2 28 2v9c-13-3-20 1-31-2s-18 2-28-1-18 1-28-2-17 2-24 0Z;M-5 12c11 1 18-4 29-1s18 0 27 4 17-2 27 0 18 0 28 3v10c-13-2-20 2-31-1s-18 3-28-1-18 2-28-1-17 1-24-1Z"
+        ></animate>
+      </path>
+    </g>
+
+    <!-- Broad horizontal interference bands. They move independently, like a weak signal. -->
+    <g class="crt-artifacts__tears">
+      <g class="crt-artifacts__tear crt-artifacts__tear--top">
+        <path d="M-5 18c18-1 26 2 42 0s31-2 68 0v4c-25-2-43 1-59 0s-28-2-51 1Z" fill="url(#crt-tear-blue)"></path>
+        <path d="M-5 20c19 1 31-1 49 1s36 1 61-1v1c-28 3-44 0-61 1s-31 1-49 0Z" fill="url(#crt-tear-red)"></path>
+      </g>
+      <g class="crt-artifacts__tear crt-artifacts__tear--middle">
+        <path d="M-5 48c19 2 34-2 50 0s32 2 60-1v3c-21 2-38-1-55 1s-31 1-55-1Z" fill="url(#crt-tear-amber)"></path>
+        <path d="M-5 51c21-1 35 1 52-1s34-1 58 1v2c-22-2-39 0-56 0s-32-1-54 1Z" fill="url(#crt-tear-blue)"></path>
+      </g>
+      <g class="crt-artifacts__tear crt-artifacts__tear--bottom">
+        <path d="M-5 76c17-2 30 1 47 0s35-2 63 1v2c-24-2-41 1-58 0s-31-1-52 1Z" fill="url(#crt-tear-red)"></path>
+        <path d="M-5 79c22 1 35-1 52 0s32 2 58-1v1c-23 3-40 0-57 1s-31 0-53 1Z" fill="url(#crt-tear-blue)"></path>
+      </g>
+    </g>
+
+    <!-- Short RGB-separated edges make the horizontal tears feel like video, not UI noise. -->
+    <g class="crt-artifacts__chroma" fill="none" stroke-linecap="square">
+      <path class="crt-artifacts__chroma-blue" d="M4 27h28l4 1h19l7-2h35"></path>
+      <path class="crt-artifacts__chroma-red" d="M2 28h29l4 1h20l7-2h34"></path>
+      <path class="crt-artifacts__chroma-blue crt-artifacts__chroma-blue--low" d="M11 63h24l5 1h18l6-2h29"></path>
+      <path class="crt-artifacts__chroma-red crt-artifacts__chroma-red--low" d="M8 64h28l4 1h20l5-2h28"></path>
+    </g>
+
+    <!-- The tube's raster structure and fine grain sit above the image. -->
+    <rect class="crt-artifacts__scanlines" x="-2" y="-2" width="104" height="104" fill="url(#crt-scanlines)"></rect>
+    <rect class="crt-artifacts__phosphor" x="-2" y="-2" width="104" height="104" fill="url(#crt-phosphor)"></rect>
+    <rect class="crt-artifacts__grain" x="-2" y="-2" width="104" height="104" filter="url(#crt-noise)"></rect>
+
+    <!-- Convex glass makes the corners fall into shadow. -->
+    <rect class="crt-artifacts__vignette" x="-2" y="-2" width="104" height="104" fill="url(#crt-vignette)"></rect>
+    <path class="crt-artifacts__glass-glint" d="M8 7c21-5 52-5 83 1" fill="none"></path>
+  </svg>
+</div>
+
+<style>
+  .crt-artifacts {
+    position: absolute;
+    z-index: 5;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    isolation: isolate;
+  }
+
+  .crt-artifacts__svg {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .crt-artifacts__wash {
+    opacity: 0.22;
+    mix-blend-mode: soft-light;
+  }
+
+  .crt-artifacts__top-interference {
+    transform-box: fill-box;
+    transform-origin: center top;
+    opacity: 0.46;
+    mix-blend-mode: normal;
+  }
+
+  .crt-artifacts__top-field {
+    opacity: 0.34;
+  }
+
+  .crt-artifacts__top-shadow {
+    opacity: 0.28;
+    mix-blend-mode: multiply;
+  }
+
+  .crt-artifacts__top-mass {
+    opacity: 0.24;
+    mix-blend-mode: soft-light;
+  }
+
+  .crt-artifacts__top-mass--violet {
+    fill: #b8c2c7;
+  }
+
+  .crt-artifacts__top-mass--amber {
+    fill: #c7c7b9;
+    opacity: 0.22;
+  }
+
+  .crt-artifacts__top-mass--blue {
+    fill: #aebdc4;
+    opacity: 0.2;
+  }
+
+  .crt-artifacts__tears {
+    mix-blend-mode: screen;
+    opacity: 0.3;
+  }
+
+  .crt-artifacts__tear {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .crt-artifacts__tear--top {
+    animation: crt-tear-top 7.4s steps(1, end) infinite;
+  }
+
+  .crt-artifacts__tear--middle {
+    animation: crt-tear-middle 10.2s steps(1, end) -3.4s infinite;
+  }
+
+  .crt-artifacts__tear--bottom {
+    animation: crt-tear-bottom 8.8s steps(1, end) -5.8s infinite;
+  }
+
+  .crt-artifacts__chroma {
+    stroke-width: 0.55;
+    opacity: 0.22;
+    mix-blend-mode: screen;
+    filter: url(#crt-line-bloom);
+  }
+
+  .crt-artifacts__chroma-blue {
+    stroke: #a7b6bc;
+  }
+
+  .crt-artifacts__chroma-red {
+    stroke: #c0b8b3;
+    transform: translateX(0.85px) translateY(0.45px);
+  }
+
+  .crt-artifacts__chroma-blue--low,
+  .crt-artifacts__chroma-red--low {
+    opacity: 0.18;
+  }
+
+  .crt-artifacts__chroma-blue--low {
+    transform: translateX(-0.65px);
+  }
+
+  .crt-artifacts__chroma-red--low {
+    transform: translateX(0.58px) translateY(0.32px);
+  }
+
+  .crt-artifacts__scanlines {
+    opacity: 0.48;
+    mix-blend-mode: multiply;
+  }
+
+  .crt-artifacts__phosphor {
+    opacity: 0.22;
+    mix-blend-mode: screen;
+  }
+
+  .crt-artifacts__grain {
+    opacity: 0.1;
+    mix-blend-mode: soft-light;
+  }
+
+  .crt-artifacts__vignette {
+    opacity: 0.58;
+    mix-blend-mode: multiply;
+  }
+
+  .crt-artifacts__glass-glint {
+    stroke: #dce6ff;
+    stroke-width: 0.45;
+    opacity: 0.14;
+    filter: url(#crt-soft-bloom);
+  }
+
+  @keyframes crt-tear-top {
+    0%,
+    68%,
+    100% {
+      transform: translate(0, 0) skewX(0deg);
+      opacity: 0.6;
+    }
+    70% {
+      transform: translate(-1.8px, 0.7px) skewX(-1.8deg);
+      opacity: 0.92;
+    }
+    73% {
+      transform: translate(1.1px, -0.3px) skewX(1deg);
+      opacity: 0.34;
+    }
+  }
+
+  @keyframes crt-tear-middle {
+    0%,
+    52%,
+    100% {
+      transform: translate(0, 0) skewX(0deg);
+      opacity: 0.52;
+    }
+    54% {
+      transform: translate(2.2px, -0.5px) skewX(2.4deg);
+      opacity: 0.96;
+    }
+    57% {
+      transform: translate(-1.3px, 0.4px) skewX(-1.2deg);
+      opacity: 0.3;
+    }
+  }
+
+  @keyframes crt-tear-bottom {
+    0%,
+    77%,
+    100% {
+      transform: translate(0, 0) skewX(0deg);
+      opacity: 0.5;
+    }
+    79% {
+      transform: translate(-1.4px, 0.3px) skewX(-1.4deg);
+      opacity: 0.86;
+    }
+    82% {
+      transform: translate(0.8px, -0.4px) skewX(0.7deg);
+      opacity: 0.28;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .crt-artifacts__tear,
+    .crt-artifacts__top-interference {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  const signalMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const signalAnimations = document.querySelectorAll("[data-crt-signal-motion]");
+
+  function updateSignalMotion() {
+    signalAnimations.forEach((animation) => {
+      if (signalMotion.matches) {
+        animation.endElement?.();
+      } else {
+        animation.beginElement?.();
+      }
+    });
+  }
+
+  updateSignalMotion();
+  signalMotion.addEventListener?.("change", updateSignalMotion);
+</script>
