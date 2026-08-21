@@ -1,0 +1,115 @@
+---
+import CrtArtifacts from "./CrtArtifacts.astro";
+import CrtWebGL from "./CrtWebGL.astro";
+import LegacyPage from "./LegacyPage.astro";
+---
+
+<aside
+  class="crt-wrap"
+  data-crt-wrap
+  aria-label="A 2005 version of this portfolio rendered on a CRT monitor"
+>
+  <CrtWebGL>
+    <LegacyPage slot="screen" />
+    <CrtArtifacts slot="artifacts" />
+  </CrtWebGL>
+  <p class="crt-caption"><span>DISPLAY_01</span> / SIGNAL FOUND</p>
+  <p class="crt-hint" aria-hidden="true">
+    <span>Drag to orbit</span>
+  </p>
+</aside>
+
+<style>
+  .crt-wrap {
+    position: absolute;
+    z-index: 1;
+    top: 50%;
+    right: calc(100% - 100vw + 7vw);
+    width: min(43vw, 660px);
+    box-sizing: border-box;
+    overflow: visible;
+    padding-bottom: 1.25rem;
+    transform: translateY(-46%);
+    pointer-events: auto;
+    transition: background 260ms ease, backdrop-filter 260ms ease;
+  }
+
+  .crt-wrap > :global(.crt-webgl) {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    aspect-ratio: 1.08;
+    overflow: visible;
+    contain: layout;
+  }
+
+  .crt-caption {
+    position: absolute;
+    z-index: 3;
+    right: 4%;
+    bottom: 0;
+    margin: 0;
+    color: #8a847c;
+    font: 9px ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: 0.12em;
+    pointer-events: none;
+  }
+
+  .crt-caption span {
+    color: #b22d25;
+  }
+
+  .crt-hint {
+    position: absolute;
+    z-index: 3;
+    left: 4%;
+    bottom: 0;
+    margin: 0;
+    color: #8a847c;
+    font: 9px ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .crt-wrap:hover .crt-hint {
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .crt-wrap {
+      position: absolute;
+      z-index: 1;
+      top: 50%;
+      right: auto;
+      left: 50%;
+      width: min(56vw, 260px);
+      max-width: none;
+      margin: 0;
+      transform: translate(-50%, -50%);
+      opacity: 0.92;
+      pointer-events: auto;
+    }
+
+    .crt-wrap > :global(.crt-webgl) {
+      aspect-ratio: 1.02;
+    }
+
+    .crt-caption {
+      right: 2%;
+      bottom: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .crt-wrap,
+    .crt-hint {
+      transition: none;
+    }
+  }
+</style>

@@ -1,18 +1,61 @@
 ---
+import CrtMonitor from "./CrtMonitor.astro";
 ---
+
 <main class="editorial-shell">
-  <header class="editorial-bar"><span>JUAN ARAUJO</span><span>ENGINEERING × DESIGN</span><span>2025 — PRESENT</span></header>
+  <header class="editorial-bar">
+    <span>JUAN ARAUJO</span><span>ENGINEERING × PRODUCT</span><span
+      >2020 — PRESENT</span
+    >
+  </header>
   <section class="editorial-main" aria-labelledby="hero-title">
-    <p class="editorial-kicker">Independent front-end engineer<br />with a product mindset.</p>
+    <p class="editorial-kicker">
+      Software Engineer<br />with a product mindset.
+    </p>
     <h1 id="hero-title">The web should<br /><em>feel inevitable.</em></h1>
     <div class="editorial-bottom">
-      <p>I turn complicated ideas into clear, fast, and human digital products. Currently building product full time and open to the right world-class team.</p>
-      <nav class="editorial-actions" aria-label="Portfolio links"><a href="#story">Read the story <span>↗</span></a><a href="https://linkedin.com/in/baltaza" target="_blank" rel="noopener">LinkedIn <span>↗</span></a><a href="https://drive.google.com/file/d/1_VD7rlEnLHo750ggmAMi31mfKWgwJpu1/view?usp=sharing" target="_blank" rel="noopener">CV <span>↓</span></a></nav>
+      <p>And that's why I'm here.</p>
+      <nav class="editorial-actions" aria-label="Portfolio links">
+        <a href="#story">Read the story <span>↗</span></a><a
+          href="https://linkedin.com/in/baltaza"
+          target="_blank"
+          rel="noopener">LinkedIn <span>↗</span></a
+        ><a
+          href="https://drive.google.com/file/d/1_VD7rlEnLHo750ggmAMi31mfKWgwJpu1/view?usp=sharing"
+          target="_blank"
+          rel="noopener">CV <span>↓</span></a
+        >
+      </nav>
     </div>
+    <CrtMonitor />
   </section>
-  <div class="editorial-mark" aria-hidden="true">01<br /><small>SELECTED<br />WORK</small></div>
+  <div class="editorial-mark" aria-hidden="true">
+    01<br /><small>SELECTED<br />WORK</small>
+  </div>
 </main>
-<section class="story" id="story" aria-labelledby="story-title"><div class="story-meta">02 / A SHORT NOTE</div><article><p class="story-kicker">How I work</p><h2 id="story-title">Good software<br /><em>gets out of the way.</em></h2><p>I believe the best digital products are built at the intersection of care and curiosity. The code matters, but so does the question behind it: does this make someone's day a little clearer, faster, or more enjoyable?</p><p>I'm Juan, a software engineer who turns rough ideas into thoughtful, resilient interfaces. I care about the quiet details — the hierarchy that makes a page easy to scan, the interaction that feels natural on the first try, and the performance that gets out of the way.</p><p>I'm currently building product full time and looking for a world-class team that values craft, ownership, and a healthy amount of play.</p><p class="story-signoff">With curiosity,<br />Juan Araujo</p></article></section>
+<section class="story" id="story" aria-labelledby="story-title">
+  <div class="story-meta">02 / A SHORT NOTE</div><article>
+    <p class="story-kicker">How I work</p><h2 id="story-title">
+      Good software<br /><em>gets out of the way.</em>
+    </h2><p>
+      Since a kid I've been tinkering with tech, I've grown fixated to products
+      and how they can change your life, this could've been a nintendo product,
+      a new website, a new game or something shiny that could change my day to day
+      use like a new android ROM. I wanted to make something out of that, I figured
+      that I could live my life not only experiencing how tech could potentially 
+      change my day to day, but how I could change the lives of many other people
+      and share some of that joy.
+   </p><p>
+     So I'm here, I'm Juan, nice to meet you. a software engineer with an obsession
+     and immense passion for the field. I care, if something has my name or my team name on it.
+     I take proud on what I do, for you as a potential employer that translates in agency and
+     creativity with a lot of ownership. Somebody to lift you up. That if you can pick my interest.
+   </p><p>
+   I'm currently tinkering full time, meaning I'm unemployed. So, I'm looking for a world-class team that values craft, ownership, that enjoys building product. 
+   Just as much as I do.
+    </p><p class="story-signoff">Juan Araujo</p>
+  </article>
+</section>
 <style>
   .editorial-shell {
     min-height: 100svh;
@@ -35,6 +78,14 @@
     flex-direction: column;
     justify-content: center;
     max-width: 1000px;
+    position: relative;
+    z-index: 2;
+  }
+  .editorial-kicker,
+  .editorial-shell h1,
+  .editorial-bottom {
+    position: relative;
+    z-index: 2;
   }
   .editorial-kicker {
     font: 14px/1.35 ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -171,6 +222,9 @@
     .editorial-bottom {
       display: block;
       margin-top: 35px;
+    }
+    .editorial-main {
+      min-height: calc(100svh - 100px);
     }
     .editorial-actions {
       align-self: auto;

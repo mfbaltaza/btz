@@ -83,7 +83,23 @@
         <feDisplacementMap
           in="SourceGraphic"
           in2="signal-noise"
-          scale="7.2"
+          scale="10.8"
+          xChannelSelector="R"
+          yChannelSelector="G"
+        ></feDisplacementMap>
+      </filter>
+      <filter id="crt-screen-arc" x="-8%" y="-8%" width="116%" height="116%" color-interpolation-filters="sRGB">
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency=".004 .012"
+          numOctaves="1"
+          seed="7"
+          result="arc-noise"
+        ></feTurbulence>
+        <feDisplacementMap
+          in="SourceGraphic"
+          in2="arc-noise"
+          scale="2.4"
           xChannelSelector="R"
           yChannelSelector="G"
         ></feDisplacementMap>
@@ -122,7 +138,7 @@
         <feDisplacementMap
           in="SourceGraphic"
           in2="top-noise"
-          scale="5.5"
+          scale="7"
           xChannelSelector="R"
           yChannelSelector="G"
         ></feDisplacementMap>
@@ -216,7 +232,12 @@
 
     <!-- Convex glass makes the corners fall into shadow. -->
     <rect class="crt-artifacts__vignette" x="-2" y="-2" width="104" height="104" fill="url(#crt-vignette)"></rect>
-    <path class="crt-artifacts__glass-glint" d="M8 7c21-5 52-5 83 1" fill="none"></path>
+    <g class="crt-artifacts__glass-arc" fill="none">
+      <path class="crt-artifacts__glass-glint" d="M3 8Q50 1 97 8"></path>
+      <path class="crt-artifacts__glass-glint crt-artifacts__glass-glint--bottom" d="M3 92Q50 99 97 92"></path>
+      <path class="crt-artifacts__glass-edge" d="M7 10Q2 50 7 90"></path>
+      <path class="crt-artifacts__glass-edge crt-artifacts__glass-edge--right" d="M93 10Q98 50 93 90"></path>
+    </g>
   </svg>
 </div>
 
@@ -240,14 +261,14 @@
   }
 
   .crt-artifacts__wash {
-    opacity: 0.22;
+    opacity: 0.14;
     mix-blend-mode: soft-light;
   }
 
   .crt-artifacts__top-interference {
     transform-box: fill-box;
     transform-origin: center top;
-    opacity: 0.46;
+    opacity: 0.32;
     mix-blend-mode: normal;
   }
 
@@ -331,30 +352,45 @@
   }
 
   .crt-artifacts__scanlines {
-    opacity: 0.48;
+    opacity: 0.22;
     mix-blend-mode: multiply;
   }
 
   .crt-artifacts__phosphor {
-    opacity: 0.22;
+    opacity: 0.14;
     mix-blend-mode: screen;
   }
 
   .crt-artifacts__grain {
-    opacity: 0.1;
+    opacity: 0.07;
     mix-blend-mode: soft-light;
   }
 
   .crt-artifacts__vignette {
-    opacity: 0.58;
+    opacity: 0.42;
     mix-blend-mode: multiply;
   }
 
   .crt-artifacts__glass-glint {
     stroke: #dce6ff;
-    stroke-width: 0.45;
-    opacity: 0.14;
+    stroke-width: 0.38;
+    opacity: 0.11;
     filter: url(#crt-soft-bloom);
+  }
+
+  .crt-artifacts__glass-glint--bottom {
+    opacity: 0.07;
+  }
+
+  .crt-artifacts__glass-edge {
+    stroke: #d7e1e0;
+    stroke-width: 0.32;
+    opacity: 0.1;
+    filter: url(#crt-soft-bloom);
+  }
+
+  .crt-artifacts__glass-edge--right {
+    opacity: 0.06;
   }
 
   @keyframes crt-tear-top {

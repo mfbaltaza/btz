@@ -1,28 +1,166 @@
 ---
-const headerImgUrl = "https://i.imgur.com/qIufhof.png";
 ---
 
-<main
-  class="grid lg:grid-cols-2 place-items-center"
->
-  <div>
-    <h1
-      class="text-5xl lg:text-6xl xl:text-7xl font-extrabold lg:tracking-tight xl:tracking-tighter"
-    >
-      Just figuring stuff out
-    </h1>
-  </div>
-  <div class="py-6 md:order-1 hidden md:block">
-    <img alt="Safety Cones" src={headerImgUrl} />
-  </div>
+<main class="ghost-page">
+  <div class="ghost-nav"><span>JUAN ARAUJO</span><span>I HAVE SEEN BETTER TRAVELERS</span></div>
+  <div class="ghost-number" aria-hidden="true">404</div>
+  <section class="ghost-main" aria-labelledby="ghost-title">
+    <p class="ghost-kicker">Error 404 / Nothing on file</p>
+    <h1 id="ghost-title">This page is<br /><em>no longer on file.</em></h1>
+    <div class="ghost-bottom">
+      <p>The page you're after isn't here. Anyways, the front page is near.</p>
+      <nav class="ghost-actions" aria-label="Portfolio links"><a href="/">Back home <span>←</span></a><a href="https://linkedin.com/in/baltaza" target="_blank" rel="noopener">LinkedIn <span>↗</span></a><a href="https://drive.google.com/file/d/1_VD7rlEnLHo750ggmAMi31mfKWgwJpu1/view?usp=sharing" target="_blank" rel="noopener">CV <span>↓</span></a></nav>
+    </div>
+  </section>
+  <div class="ghost-mark" aria-hidden="true">04<br /><small>NOT<br />FOUND</small></div>
 </main>
 
 <style>
-  h1 {
+  .ghost-page {
+    position: relative;
+    background: #e9e4dc;
+    color: #161616;
+    padding: 26px 4vw;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .ghost-page a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .ghost-nav {
+    display: flex;
+    justify-content: space-between;
+    font: 11px ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid #aaa49b;
+    padding-bottom: 15px;
+  }
+  .ghost-number {
+    position: absolute;
+    right: -3vw;
+    bottom: -8vh;
+    font: clamp(20rem, 38vw, 42rem) / 0.75 Georgia, serif;
+    letter-spacing: -0.06em;
+    color: #d6cfc1;
+    z-index: 0;
+    user-select: none;
+    animation: enter 420ms cubic-bezier(0.23, 1, 0.32, 1) 60ms both;
+  }
+  .ghost-main {
+    position: relative;
+    z-index: 1;
+    min-height: calc(100svh - 100px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 1000px;
+  }
+  .ghost-kicker {
+    font: 600 13px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #b22d25;
+    margin: 0 0 34px;
     animation: enter 420ms cubic-bezier(0.23, 1, 0.32, 1) both;
   }
+  .ghost-page h1 {
+    font: clamp(4rem, 9vw, 9.5rem) / 0.85 Georgia, serif;
+    letter-spacing: -0.07em;
+    font-weight: 400;
+    margin: 0;
+    animation: enter 420ms cubic-bezier(0.23, 1, 0.32, 1) 50ms both;
+  }
+  .ghost-page h1 em {
+    font-style: italic;
+  }
+  .ghost-bottom {
+    display: flex;
+    gap: 10vw;
+    margin-top: 55px;
+    max-width: 680px;
+    font: 16px/1.5 Georgia, serif;
+    animation: enter 420ms cubic-bezier(0.23, 1, 0.32, 1) 100ms both;
+  }
+  .ghost-bottom p {
+    margin: 0;
+    max-width: 390px;
+    color: #5f5a52;
+  }
+  .ghost-actions {
+    align-self: flex-end;
+    display: flex;
+    gap: 18px;
+    font: 12px ui-monospace, SFMono-Regular, Menlo, monospace;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .ghost-actions a {
+    border-bottom: 1px solid;
+    padding-bottom: 4px;
+  }
+  .ghost-actions a:first-child {
+    border-color: #b22d25;
+  }
+  .ghost-actions span {
+    color: #b22d25;
+  }
+  .ghost-mark {
+    position: absolute;
+    right: 4vw;
+    bottom: 40px;
+    z-index: 1;
+    font: 11px ui-monospace, SFMono-Regular, Menlo, monospace;
+    text-align: right;
+  }
+  .ghost-mark small {
+    font-size: 9px;
+    line-height: 1.3;
+    display: block;
+    color: #777;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .ghost-actions a {
+      transition: color 160ms ease-out, border-color 160ms ease-out;
+    }
+    .ghost-actions a:hover {
+      color: #b22d25;
+    }
+    .ghost-actions a:active {
+      transform: scale(0.97);
+    }
+  }
+
+  @media (max-width: 700px) {
+    .ghost-nav span:last-child {
+      display: none;
+    }
+    .ghost-page h1 {
+      font-size: clamp(3.5rem, 16vw, 7rem);
+    }
+    .ghost-number {
+      bottom: -4vh;
+    }
+    .ghost-bottom {
+      display: block;
+      margin-top: 35px;
+    }
+    .ghost-actions {
+      align-self: auto;
+      margin-top: 24px;
+      flex-wrap: wrap;
+      white-space: normal;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    h1 {
+    .ghost-kicker,
+    .ghost-page h1,
+    .ghost-bottom,
+    .ghost-number {
       animation: none;
     }
   }

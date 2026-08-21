@@ -40,7 +40,30 @@
           element.setAttribute("tabindex", "-1");
         });
         screenLayer.appendChild(distortionCopy);
+
+        const arcCopy = screenContent.cloneNode(true);
+        if (arcCopy instanceof HTMLElement) {
+          arcCopy.classList.add("crt-webgl__screen-content--arc");
+          arcCopy.setAttribute("aria-hidden", "true");
+          arcCopy.querySelectorAll("a, button").forEach((element) => {
+            element.setAttribute("tabindex", "-1");
+          });
+          screenLayer.appendChild(arcCopy);
+        }
       }
+
+      screenLayer.addEventListener(
+        "wheel",
+        (event) => {
+          if (!(screenContent instanceof HTMLElement)) return;
+          const canScroll =
+            screenContent.scrollHeight > screenContent.clientHeight;
+          if (!canScroll) return;
+          event.preventDefault();
+          screenContent.scrollTop += event.deltaY;
+        },
+        { passive: false }
+      );
     }
 
     const scene = new THREE.Scene();
@@ -57,7 +80,7 @@
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.16;
+    renderer.toneMappingExposure = 1.28;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -65,26 +88,79 @@
     monitor.position.y = 0.35;
     scene.add(monitor);
 
+    const isCompact = window.matchMedia("(max-width: 700px)").matches;
+    const shellSegments = isCompact ? 2 : 4;
+    const bevelSegments = isCompact ? 1 : 2;
+
+    // Yellowed from use: off-white with nicotine/sun yellowing, satin but slightly rougher where handled
+    function createYellowingTexture() {
+      const c = document.createElement("canvas");
+      c.width = 512; c.height = 512;
+      const ctx = c.getContext("2d");
+      if (!ctx) return null;
+      ctx.fillStyle = "#f2eac2";
+      ctx.fillRect(0, 0, 512, 512);
+      // subtle uneven yellowing — stronger at edges/near vents
+      for (let i = 0; i < 7; i += 1) {
+        const x = (Math.random() * 0.7 + 0.15) * 512;
+        const y = (Math.random() * 0.7 + 0.15) * 512;
+        const r = 80 + Math.random() * 140;
+        const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+        const a = 0.08 + Math.random() * 0.1;
+        g.addColorStop(0, `rgba(210,170,70,${a})`);
+        g.addColorStop(0.45, `rgba(225,190,95,${a * 0.6})`);
+        g.addColorStop(1, "rgba(242,234,194,0)");
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+      }
+      // edge darkening
+      const edge = ctx.createLinearGradient(0, 0, 0, 512);
+      edge.addColorStop(0, "rgba(180,145,60,0.14)");
+      edge.addColorStop(0.12, "rgba(180,145,60,0)");
+      edge.addColorStop(0.88, "rgba(180,145,60,0)");
+      edge.addColorStop(1, "rgba(180,145,60,0.12)");
+      ctx.fillStyle = edge; ctx.fillRect(0, 0, 512, 512);
+      // fine grain
+      ctx.globalAlpha = 0.04;
+      for (let i = 0; i < 6000; i += 1) {
+        ctx.fillStyle = Math.random() > 0.5 ? "#8a7a40" : "#fff8d0";
+        ctx.fillRect(Math.random()*512, Math.random()*512, 1, 1);
+      }
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+      return tex;
+    }
+    const yellowingMap = createYellowingTexture();
     const bodyMaterial = new THREE.MeshStandardMaterial({
-      color: 0x73796f,
-      roughness: 0.72,
-      metalness: 0.04,
+      color: 0xffffff,
+      map: yellowingMap || undefined,
+      // properly matte — satin gloss picks up point-light speculars that read as
+      // the power LED glowing through the case when the back faces the camera
+      roughness: 0.88,
+      metalness: 0.01,
     });
     const edgeMaterial = new THREE.MeshStandardMaterial({
-      color: 0x4d554c,
-      roughness: 0.76,
-      metalness: 0.03,
+      color: 0xffffff,
+      map: yellowingMap || undefined,
+      roughness: 0.89,
+      metalness: 0.015,
     });
     const darkMaterial = new THREE.MeshStandardMaterial({
-      color: 0x252c27,
-      roughness: 0.84,
+      color: 0x131615,
+      roughness: 0.86,
       metalness: 0.02,
     });
     const rearMaterial = new THREE.MeshStandardMaterial({
-      color: 0x626960,
-      roughness: 0.79,
-      metalness: 0.02,
+      color: 0xffffff,
+      map: yellowingMap || undefined,
+      roughness: 0.9,
+      metalness: 0.01,
     });
+    if (yellowingMap) {
+      // tint rear slightly more yellowed than front (sun hits back)
+      rearMaterial.color.setHex(0xfff8e0);
+    }
 
     function roundedBox(
       width,
@@ -93,7 +169,7 @@
       radius,
       material,
       position,
-      segments = 1
+      segments = shellSegments
     ) {
       const mesh = new THREE.Mesh(
         new RoundedBoxGeometry(width, height, depth, segments, radius),
@@ -106,15 +182,17 @@
       return mesh;
     }
 
-    // The shell remains volumetric so its body, neck, and foot read as one object.
-    roundedBox(8.7, 6.2, 4.55, 0.14, bodyMaterial, [0, 2.15, 0], 1);
-    roundedBox(7.95, 5.55, 0.44, 0.07, edgeMaterial, [0, 2.24, 2.22], 1);
-    roundedBox(6.78, 4.52, 0.34, 0.05, darkMaterial, [0, 2.43, 2.42], 1);
+    // Main shell — slightly tighter radii to match the flat face in the reference
+    roundedBox(8.7, 6.2, 4.55, 0.09, bodyMaterial, [0, 2.15, 0], shellSegments);
+    // Front bezel — thick white frame, flat as in photo
+    roundedBox(7.95, 5.55, 0.38, 0.06, edgeMaterial, [0, 2.24, 2.22], bevelSegments);
+    // Screen recess — deep inset shadow
+    roundedBox(6.58, 4.42, 0.28, 0.04, darkMaterial, [0, 2.43, 2.38], bevelSegments);
 
     const screenShape = new THREE.Shape();
-    const screenWidth = 6.18;
-    const screenHeight = 3.82;
-    const screenRadius = 0.24;
+    const screenWidth = 6.08;
+    const screenHeight = 3.74;
+    const screenRadius = 0.12;
     const left = -screenWidth / 2;
     const right = screenWidth / 2;
     const bottom = -screenHeight / 2;
@@ -130,15 +208,15 @@
     screenShape.quadraticCurveTo(left, bottom, left + screenRadius, bottom);
 
     const screenGeometry = new THREE.ExtrudeGeometry(screenShape, {
-      depth: 0.22,
+      depth: 0.18,
       bevelEnabled: true,
-      bevelSegments: 2,
-      bevelSize: 0.06,
-      bevelThickness: 0.06,
-      curveSegments: 8,
+      bevelSegments: bevelSegments,
+      bevelSize: 0.03,
+      bevelThickness: 0.03,
+      curveSegments: isCompact ? 6 : 10,
       steps: 1,
     });
-    screenGeometry.translate(0, 0, -0.11);
+    screenGeometry.translate(0, 0, -0.09);
     const screenPositions = screenGeometry.attributes.position;
     for (let i = 0; i < screenPositions.count; i += 1) {
       const x = screenPositions.getX(i);
@@ -146,110 +224,450 @@
       const z = screenPositions.getZ(i);
       const curve = Math.max(
         0,
-        1 - (x / (screenWidth * 0.54)) ** 2 - (y / (screenHeight * 0.54)) ** 2
+        1 - (x / (screenWidth * 0.58)) ** 2 - (y / (screenHeight * 0.58)) ** 2
       );
-      const frontness = THREE.MathUtils.clamp((z + 0.11) / 0.22, 0, 1);
-      screenPositions.setZ(i, z + curve * frontness * 0.08);
+      const frontness = THREE.MathUtils.clamp((z + 0.09) / 0.18, 0, 1);
+      // Nearly flat as in reference — subtle 0.03 bulge only
+      screenPositions.setZ(i, z + curve * frontness * 0.04);
     }
     screenGeometry.computeVertexNormals();
-    const glass = new THREE.MeshPhysicalMaterial({
-      color: 0x12231d,
-      emissive: 0x07110d,
-      emissiveIntensity: 0.38,
-      roughness: 0.2,
+    // Flat dark glass — matte like the photo, not glossy curved
+    const glass = new THREE.MeshStandardMaterial({
+      color: 0x0e1411,
+      roughness: 0.48,
       metalness: 0.08,
-      clearcoat: 0.72,
-      clearcoatRoughness: 0.16,
+      emissive: 0x07110d,
+      emissiveIntensity: 0.22,
     });
     const screenMesh = new THREE.Mesh(screenGeometry, glass);
-    screenMesh.position.set(0, 2.43, 2.54);
-    screenMesh.castShadow = true;
+    screenMesh.position.set(0, 2.43, 2.53);
     screenMesh.receiveShadow = true;
     monitor.add(screenMesh);
 
-    // The control strip and physical controls give the front face depth beyond the glass.
-    roundedBox(6.7, 0.5, 0.22, 0.04, edgeMaterial, [0, 0.07, 2.42], 1);
-    const buttonMaterial = new THREE.MeshStandardMaterial({
-      color: 0x6c7168,
-      roughness: 0.48,
-      metalness: 0.08,
-    });
-    function button(x, radius, depth = 0.16) {
-      const mesh = new THREE.Mesh(
-        new THREE.CylinderGeometry(radius, radius * 1.06, depth, 24),
-        buttonMaterial
-      );
-      mesh.rotation.x = Math.PI / 2;
-      mesh.position.set(x, 0.07, 2.55);
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
-      monitor.add(mesh);
-    }
-    button(2.42, 0.2, 0.18);
-    button(2.95, 0.13);
-    button(3.36, 0.09);
-    const power = new THREE.Mesh(
-      new THREE.SphereGeometry(0.075, 16, 10),
+    // Screen inner glow rim — subtle edge highlight
+    const innerBezel = new THREE.Mesh(
+      new RoundedBoxGeometry(6.22, 3.92, 0.06, bevelSegments, 0.03),
       new THREE.MeshStandardMaterial({
-        color: 0x9baa78,
-        emissive: 0x637d43,
-        emissiveIntensity: 1.8,
+        color: 0x0a0f0d,
+        roughness: 0.72,
+        metalness: 0.05,
       })
     );
-    power.position.set(1.92, 0.07, 2.55);
-    monitor.add(power);
+    innerBezel.position.set(0, 2.43, 2.44);
+    innerBezel.receiveShadow = true;
+    monitor.add(innerBezel);
 
-    // Neck and foot are overlapping solid volumes, rather than floating planes.
-    roundedBox(2.7, 1.55, 1.95, 0.08, bodyMaterial, [0, -1.06, 0], 1);
-    roundedBox(7.05, 0.78, 3.05, 0.09, bodyMaterial, [0, -1.88, 0], 1);
-    roundedBox(7.55, 0.34, 3.35, 0.05, edgeMaterial, [0, -2.43, 0.06], 1);
+    // Bottom control strip — flat white with subtle shadow line as in photo
+    roundedBox(6.7, 0.52, 0.18, 0.03, edgeMaterial, [0, 0.07, 2.41], bevelSegments);
+    // Horizontal slot / drawer line (thin dark recess)
+    const slot = new THREE.Mesh(
+      new THREE.BoxGeometry(2.15, 0.02, 0.02),
+      new THREE.MeshStandardMaterial({ color: 0x1a1e1c, roughness: 0.92 })
+    );
+    slot.position.set(-0.75, 0.12, 2.515);
+    monitor.add(slot);
+    // Another faint line below slot for depth
+    const slotShadow = new THREE.Mesh(
+      new THREE.BoxGeometry(2.15, 0.015, 0.01),
+      new THREE.MeshStandardMaterial({ color: 0x2a2e2b, roughness: 0.9 })
+    );
+    slotShadow.position.set(-0.75, 0.045, 2.515);
+    monitor.add(slotShadow);
 
-    // Rear service panel, vents, fan and port details remain attached to the closed shell.
-    roundedBox(8, 5.45, 0.3, 0.06, rearMaterial, [0, 2.2, -2.28], 1);
+    // Power button — square, flat, barely protruding like reference
+    const powerBtnMat = new THREE.MeshStandardMaterial({
+      color: 0xf2efe8,
+      roughness: 0.58,
+      metalness: 0.03,
+    });
+    const powerBtn = new THREE.Mesh(
+      new THREE.BoxGeometry(0.36, 0.36, 0.06),
+      powerBtnMat
+    );
+    powerBtn.position.set(2.45, 0.07, 2.53);
+    powerBtn.castShadow = true;
+    powerBtn.receiveShadow = true;
+    monitor.add(powerBtn);
+    // Button recess frame
+    const btnFrame = new THREE.Mesh(
+      new THREE.BoxGeometry(0.4, 0.4, 0.02),
+      new THREE.MeshStandardMaterial({ color: 0xd8d3c6, roughness: 0.78 })
+    );
+    btnFrame.position.set(2.45, 0.07, 2.495);
+    monitor.add(btnFrame);
+    // Small power icon on button (pressed square)
+    const icon = new THREE.Mesh(
+      new THREE.BoxGeometry(0.16, 0.16, 0.012),
+      new THREE.MeshStandardMaterial({ color: 0xc9c4b8, roughness: 0.7 })
+    );
+    icon.position.set(2.45, 0.07, 2.565);
+    monitor.add(icon);
+    // LED dot — self-lit power light left of button, no light spill
+    const ledMat = new THREE.MeshStandardMaterial({
+      color: 0x00ff40,
+      emissive: 0x00d435,
+      emissiveIntensity: 3.6,
+      roughness: 0.3,
+    });
+    const led = new THREE.Mesh(
+      new THREE.SphereGeometry(0.028, 10, 8),
+      ledMat
+    );
+    led.position.set(1.92, 0.07, 2.545);
+    monitor.add(led);
+    const ledHousing = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.045, 0.045, 0.02, 12),
+      new THREE.MeshStandardMaterial({ color: 0xd0ccc2, roughness: 0.82 })
+    );
+    ledHousing.rotation.x = Math.PI / 2;
+    ledHousing.position.set(1.92, 0.07, 2.535);
+    monitor.add(ledHousing);
+
+    // Neck — more organic taper like photo (slightly curved rear)
+    roundedBox(2.9, 1.45, 2.05, 0.09, bodyMaterial, [0, -1.02, -0.05], shellSegments);
+
+    // Foot — oval disc like reference, not rectangular block
+    const footTopMat = bodyMaterial;
+    const baseDisc = new THREE.Mesh(
+      new THREE.CylinderGeometry(2.95, 3.05, 0.22, 32),
+      footTopMat
+    );
+    baseDisc.position.set(0, -1.78, 0.15);
+    baseDisc.castShadow = true;
+    baseDisc.receiveShadow = true;
+    monitor.add(baseDisc);
+    const baseDiscUnder = new THREE.Mesh(
+      new THREE.CylinderGeometry(3.0, 3.0, 0.12, 32),
+      edgeMaterial
+    );
+    baseDiscUnder.position.set(0, -1.95, 0.15);
+    baseDiscUnder.receiveShadow = true;
+    monitor.add(baseDiscUnder);
+    const stem = new THREE.Mesh(
+      new THREE.CylinderGeometry(1.05, 1.35, 0.55, 24),
+      bodyMaterial
+    );
+    stem.position.set(0, -1.55, 0.12);
+    stem.castShadow = true;
+    monitor.add(stem);
+
+    // Side perforated vent — dot matrix as in photo (large arc on side)
+    const dotMat = new THREE.MeshStandardMaterial({
+      color: 0xd6d0c2,
+      roughness: 0.92,
+    });
+    const dotHoleMat = new THREE.MeshStandardMaterial({
+      color: 0x1a1e1c,
+      roughness: 0.95,
+    });
+    function createSideVent(xSign) {
+      const ventGroup = new THREE.Group();
+      // Vent backing — slight recessed panel
+      const backing = new THREE.Mesh(
+        new THREE.CylinderGeometry(1.55, 1.65, 0.04, 24, 1, true, -0.9, 1.8),
+        new THREE.MeshStandardMaterial({
+          color: 0xe2ddd2,
+          roughness: 0.88,
+          side: THREE.DoubleSide,
+        })
+      );
+      backing.rotation.z = Math.PI / 2;
+      backing.rotation.y = xSign > 0 ? 0 : Math.PI;
+      backing.position.set(xSign * 4.22, 1.55, -0.15);
+      ventGroup.add(backing);
+
+      // Dot holes — ~70 dots in arc
+      const rows = 9;
+      const cols = 9;
+      for (let r = 0; r < rows; r++) {
+        const y = 0.55 + r * 0.22;
+        // Arc width tapers at top/bottom
+        const t = Math.abs(r - 4) / 4;
+        const rowCols = Math.round(7 - t * 3);
+        const rowOffset = (cols - rowCols) * 0.11 * 0.5;
+        for (let c = 0; c < rowCols; c++) {
+          const x = -0.65 + c * 0.18 + rowOffset;
+          const z = -0.85 + Math.sin((c / rowCols) * Math.PI) * 0.25;
+          const isHole = Math.random() > 0.12; // mostly holes
+          const dot = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.035, 0.035, 0.025, 6),
+            isHole ? dotHoleMat : dotMat
+          );
+          dot.rotation.z = Math.PI / 2;
+          dot.rotation.y = xSign > 0 ? 0 : Math.PI;
+          // Slight curvature along side
+          dot.position.set(xSign * (4.24 + Math.abs(z) * 0.08), y, z - 0.15);
+          ventGroup.add(dot);
+        }
+      }
+      monitor.add(ventGroup);
+    }
+    if (!isCompact) {
+      createSideVent(1);
+      createSideVent(-1);
+    } else {
+      // Simplified mobile: fewer dots
+      const simpleDot = new THREE.Mesh(
+        new THREE.BoxGeometry(0.04, 1.6, 1.2),
+        dotHoleMat
+      );
+      simpleDot.position.set(4.32, 1.55, -0.15);
+      monitor.add(simpleDot);
+      const simpleDotR = simpleDot.clone();
+      simpleDotR.position.set(-4.32, 1.55, -0.15);
+      monitor.add(simpleDotR);
+    }
+
+    // Rear service panel, vents, fan and port details
+    roundedBox(8, 5.45, 0.3, 0.06, rearMaterial, [0, 2.2, -2.28], bevelSegments);
     for (let i = 0; i < 8; i += 1) {
       roundedBox(
-        0.16,
-        2.85,
-        0.06,
+        0.14,
+        2.75,
+        0.05,
         0.01,
         darkMaterial,
-        [-2.2 + i * 0.28, 2.38, -2.45],
+        [-2.1 + i * 0.28, 2.38, -2.45],
         1
       );
     }
     const fan = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.68, 0.68, 0.08, 32),
+      new THREE.CylinderGeometry(0.62, 0.62, 0.08, 32),
       darkMaterial
     );
     fan.rotation.x = Math.PI / 2;
-    fan.position.set(1.3, 1.5, -2.45);
+    fan.position.set(1.25, 1.5, -2.45);
     fan.castShadow = true;
     monitor.add(fan);
     const fanRing = new THREE.Mesh(
-      new THREE.TorusGeometry(0.68, 0.06, 8, 32),
+      new THREE.TorusGeometry(0.62, 0.055, 8, 32),
       edgeMaterial
     );
     fanRing.rotation.x = Math.PI / 2;
-    fanRing.position.set(1.3, 1.5, -2.45);
+    fanRing.position.set(1.25, 1.5, -2.45);
     fanRing.castShadow = true;
     fanRing.receiveShadow = true;
     monitor.add(fanRing);
-    roundedBox(1.1, 0.48, 0.12, 0.02, darkMaterial, [-2.25, 0.25, -2.45], 1);
+
+    // Rear I/O — VGA + power + cable stub
+    const portMaterial = new THREE.MeshStandardMaterial({
+      color: 0x1a2221,
+      roughness: 0.88,
+      metalness: 0.06,
+    });
+    const portMetal = new THREE.MeshStandardMaterial({
+      color: 0x8ea0a8,
+      roughness: 0.42,
+      metalness: 0.55,
+    });
+    roundedBox(1.02, 0.58, 0.1, 0.02, portMaterial, [2.48, 0.05, -2.45], 1);
+    roundedBox(0.88, 0.44, 0.12, 0.01, portMetal, [2.48, 0.05, -2.46], 1);
+    for (let c = 0; c < 3; c += 1) {
+      for (let r = 0; r < 5; r += 1) {
+        const pin = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.022, 0.022, 0.06, 8),
+          new THREE.MeshStandardMaterial({ color: 0xc9a86a, metalness: 0.7, roughness: 0.4 })
+        );
+        pin.rotation.x = Math.PI / 2;
+        pin.position.set(2.26 + r * 0.11, -0.08 + c * 0.11, -2.47);
+        monitor.add(pin);
+      }
+    }
+    roundedBox(0.68, 0.68, 0.1, 0.03, portMaterial, [-2.18, 0.18, -2.45], 1);
+    const powerSocketInner = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.2, 0.2, 0.06, 16),
+      new THREE.MeshStandardMaterial({ color: 0x0f1413, roughness: 0.9 })
+    );
+    powerSocketInner.rotation.x = Math.PI / 2;
+    powerSocketInner.position.set(-2.18, 0.18, -2.46);
+    monitor.add(powerSocketInner);
+    const cable = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.13, 0.13, 0.85, 12),
+      new THREE.MeshStandardMaterial({ color: 0x1a1e1e, roughness: 0.85 })
+    );
+    cable.rotation.x = Math.PI / 2;
+    cable.position.set(-2.18, 0.18, -2.92);
+    monitor.add(cable);
+    const cableCollar = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.18, 0.21, 0.16, 12),
+      new THREE.MeshStandardMaterial({ color: 0x2a2e2d, roughness: 0.8 })
+    );
+    cableCollar.rotation.x = Math.PI / 2;
+    cableCollar.position.set(-2.18, 0.18, -2.5);
+    monitor.add(cableCollar);
+
+    // Foot pads on base disc
+    const padMat = new THREE.MeshStandardMaterial({ color: 0x1a1e1e, roughness: 0.95 });
+    [[-1.4, -2.02, 1.1], [1.4, -2.02, 1.1], [-1.4, -2.02, -0.85], [1.4, -2.02, -0.85]].forEach(([x,y,z])=>{
+      const pad = new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.18,0.06,10), padMat);
+      pad.position.set(x,y,z);
+      monitor.add(pad);
+    });
+
+    // --- Stickers: Syntax pin designs (CSS/TS/JS/INTERNET) + yellowing wear ---
+    function makeStickerTexture(draw) {
+      const c = document.createElement("canvas");
+      c.width = 512; c.height = 512;
+      const ctx = c.getContext("2d");
+      if (!ctx) return null;
+      draw(ctx, 512);
+      // slight paper texture + worn edge
+      ctx.globalAlpha = 0.07;
+      for (let i = 0; i < 4000; i+=1) {
+        ctx.fillStyle = Math.random() > 0.5 ? "#000" : "#fff";
+        ctx.fillRect(Math.random()*512, Math.random()*512, 1, 1);
+      }
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.anisotropy = 4;
+      return tex;
+    }
+    function stickerPlane(texture, w, h, pos, rot, scale=1, opts={}) {
+      const geo = new THREE.PlaneGeometry(w*scale, h*scale);
+      const isInternet = opts.unlit === true;
+      const shared = {
+        map: texture || undefined,
+        transparent: true,
+        // single-sided — a decal's backing is opaque, mirrored text must not
+        // show through from the anti-side
+        side: THREE.FrontSide,
+        polygonOffset: true,
+        polygonOffsetFactor: -2,
+        polygonOffsetUnits: -2,
+      };
+      const mat = isInternet ? new THREE.MeshBasicMaterial(shared) : new THREE.MeshStandardMaterial({
+        ...shared,
+        roughness: 0.62,
+        metalness: 0.0,
+      });
+      const m = new THREE.Mesh(geo, mat);
+      // Float the decal just proud of its surface along its own normal — polygon offset
+      // alone fades to zero at head-on angles, so coplanar decals lose the depth fight
+      // against the case and vanish mid-spin
+      const normal = new THREE.Vector3(0, 0, 1).applyEuler(new THREE.Euler(rot[0], rot[1], rot[2]));
+      const lift = 0.02;
+      m.position.set(pos[0]+normal.x*lift, pos[1]+normal.y*lift, pos[2]+normal.z*lift);
+      m.rotation.set(rot[0], rot[1], rot[2]);
+      m.castShadow = false; m.receiveShadow = !isInternet;
+      monitor.add(m);
+      // peel shadow hugs the case, tucked just under the decal
+      const under = 0.008;
+      const shadow = new THREE.Mesh(
+        new THREE.PlaneGeometry(w*scale*1.04, h*scale*1.04),
+        new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: isInternet ? 0.22 : 0.14, side: THREE.FrontSide })
+      );
+      shadow.position.set(pos[0]+normal.x*under, pos[1]+normal.y*under, pos[2]+normal.z*under);
+      shadow.rotation.set(rot[0], rot[1], rot[2]);
+      monitor.add(shadow);
+      return m;
+    }
+    // CSS — purple rounded square
+    const cssTex = makeStickerTexture((ctx, s)=>{
+      ctx.fillStyle = "#ffffff"; ctx.fillRect(0,0,s,s);
+      const r=46; ctx.fillStyle="#7b5cf0";
+      ctx.beginPath(); ctx.roundRect(28,28,s-56,s-56,r); ctx.fill();
+      ctx.strokeStyle="rgba(0,0,0,0.18)"; ctx.lineWidth=6; ctx.stroke();
+      ctx.fillStyle="#fff"; ctx.font="900 148px Inter, system-ui, sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+      // slight enamel highlight
+      ctx.fillText("CSS", s/2+2, s/2+58);
+      ctx.fillStyle="#fff"; ctx.fillText("CSS", s/2, s/2+56);
+    });
+    // TS — bright blue
+    const tsTex = makeStickerTexture((ctx,s)=>{
+      ctx.fillStyle="#ffffff"; ctx.fillRect(0,0,s,s);
+      ctx.fillStyle="#2aa1e0"; ctx.beginPath(); ctx.roundRect(28,28,s-56,s-56,38); ctx.fill();
+      ctx.strokeStyle="rgba(0,0,0,0.16)"; ctx.lineWidth=6; ctx.stroke();
+      ctx.fillStyle="#fff"; ctx.font="900 190px Inter, system-ui, sans-serif"; ctx.textAlign="center";
+      ctx.fillText("TS", s/2, s/2+68);
+    });
+    // JS — yellow with black JS
+    const jsTex = makeStickerTexture((ctx,s)=>{
+      ctx.fillStyle="#ffffff"; ctx.fillRect(0,0,s,s);
+      ctx.fillStyle="#f5e351"; ctx.fillRect(28,28,s-56,s-56);
+      ctx.strokeStyle="rgba(0,0,0,0.85)"; ctx.lineWidth=7; ctx.strokeRect(28,28,s-56,s-56);
+      ctx.fillStyle="#0a0a0a"; ctx.font="900 180px Inter, system-ui, sans-serif"; ctx.textAlign="center";
+      ctx.fillText("JS", s/2+6, s/2+68);
+    });
+    // INTERNET — high-res enamel pin replica, crisp as in photo
+    function makeInternetTexture() {
+      const W = 2048, H = 440;
+      const c = document.createElement("canvas");
+      c.width = W; c.height = H;
+      const ctx = c.getContext("2d");
+      if (!ctx) return null;
+      // pure white enamel base like pin
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+      ctx.roundRect(6, 6, W - 12, H - 12, 18);
+      ctx.fill();
+      // subtle outer emboss — thin grey edge
+      ctx.strokeStyle = "rgba(0,0,0,0.18)";
+      ctx.lineWidth = 4;
+      ctx.stroke();
+      // tall condensed Didone-style serif — exactly as pin: deep red on white
+      const word = "INTERNET";
+      const fontSize = 560;
+      ctx.font = `700 ${fontSize}px Georgia,'Times New Roman','Liberation Serif',serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "alphabetic";
+      // condense horizontally to fill the banner, letters stay crisp (no vertical stretch)
+      const natural = ctx.measureText(word).width;
+      const sx = (W - 110) / natural;
+      // vertical centering: baseline sits half a cap-height below center
+      const baseY = H / 2 + fontSize * 0.345;
+      ctx.save();
+      ctx.translate(W / 2, baseY);
+      ctx.scale(sx, 1);
+      // hard dark-red drop shadow, bottom-right — enamel thickness like the pin
+      ctx.fillStyle = "rgba(96,0,0,0.85)";
+      ctx.fillText(word, 9, 11);
+      // main vivid red face
+      ctx.fillStyle = "#dd0808";
+      ctx.fillText(word, 0, 0);
+      ctx.restore();
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.anisotropy = 16;
+      tex.minFilter = THREE.LinearMipMapLinearFilter;
+      tex.magFilter = THREE.LinearFilter;
+      tex.generateMipmaps = true;
+      return tex;
+    }
+    const netTex = makeInternetTexture();
+    // Syntax — black with yellow Syntax. stacked
+    const synTex = makeStickerTexture((ctx,s)=>{
+      ctx.fillStyle="#0a0a0a"; ctx.fillRect(0,0,s,s);
+      ctx.fillStyle="#f2c744"; ctx.font="900 98px Inter, system-ui, sans-serif"; ctx.textAlign="center";
+      ctx.fillText("Syn", s/2, s/2-28);
+      ctx.fillText("tax.", s/2, s/2+86);
+      ctx.strokeStyle="rgba(255,255,255,0.9)"; ctx.lineWidth=4; ctx.strokeRect(18,18,s-36,s-36);
+    });
+
+    if (!isCompact && cssTex && tsTex && jsTex && netTex && synTex) {
+      // Top of monitor — wide INTERNET banner high-def unlit so red stays vivid
+      stickerPlane(netTex, 3.6, 0.775, [0, 5.32, 0.25], [-Math.PI/2, 0, 0], 1, { unlit: true });
+      // Right side — CSS + JS cluster
+      stickerPlane(cssTex, 0.78, 0.78, [4.35, 2.95, 0.35], [0, Math.PI/2, -0.07], 1);
+      stickerPlane(jsTex, 0.72, 0.72, [4.36, 1.95, -0.15], [0, Math.PI/2, 0.09], 1);
+      // Left side — TS + small Syntax
+      stickerPlane(tsTex, 0.78, 0.78, [-4.35, 2.85, 0.25], [0, -Math.PI/2, 0.07], 1);
+      stickerPlane(synTex, 0.52, 0.52, [-4.36, 1.98, -0.55], [0, -Math.PI/2, -0.11], 0.85);
+    }
 
     const floor = new THREE.Mesh(
       new THREE.PlaneGeometry(14, 10),
-      new THREE.ShadowMaterial({ color: 0x111711, opacity: 0.18 })
+      new THREE.ShadowMaterial({ color: 0x111711, opacity: 0.2 })
     );
     floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -2.28;
+    floor.position.y = -2.08;
     floor.receiveShadow = true;
     scene.add(floor);
 
-    scene.add(new THREE.HemisphereLight(0xd7e0d5, 0x303830, 1.8));
-    const key = new THREE.DirectionalLight(0xfff1dc, 2.6);
+    scene.add(new THREE.HemisphereLight(0xd7e0d5, 0x303830, 2.0));
+    const key = new THREE.DirectionalLight(0xfff6e8, 3.6);
     key.position.set(-6, 10, 9);
     key.castShadow = true;
-    key.shadow.mapSize.set(1024, 1024);
+    key.shadow.mapSize.set(isCompact ? 1024 : 2048, isCompact ? 1024 : 2048);
     key.shadow.camera.left = -8;
     key.shadow.camera.right = 8;
     key.shadow.camera.top = 9;
@@ -257,15 +675,17 @@
     key.shadow.normalBias = 0.025;
     key.shadow.bias = -0.0005;
     scene.add(key);
-    const fill = new THREE.DirectionalLight(0xc8e1d5, 1.45);
+    const fill = new THREE.DirectionalLight(0xc8e1d5, 1.25);
     fill.position.set(7, 5, 9);
     scene.add(fill);
-    const rim = new THREE.PointLight(0x7b9d88, 8, 18, 2);
+    const rim = new THREE.PointLight(0x7b9d88, 9, 18, 2);
     rim.position.set(5, 4, -6);
     scene.add(rim);
-    const screenLight = new THREE.PointLight(0x6da080, 1.8, 7, 2);
-    screenLight.position.set(0, 2.2, 4.5);
-    scene.add(screenLight);
+    const screenLight = new THREE.PointLight(0x6da080, 1.6, 6, 2);
+    // parented to the monitor so the glow comes FROM the screen — orbiting to the
+    // back takes the light along instead of spotlighting the rear panel
+    screenLight.position.set(0, 1.85, 4.5);
+    monitor.add(screenLight);
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const orbit = {
@@ -274,8 +694,7 @@
       targetYaw: -0.24,
       targetPitch: 0.05,
     };
-    const yawBounds = { min: -0.38, max: 0.08 };
-    const pitchBounds = { min: -0.2, max: 0.2 };
+    const pitchBounds = { min: -0.65, max: 0.65 };
     const idle = { yaw: -0.24, pitch: 0.05 };
     let dragging = false;
     let idleResumeAt = 0;
@@ -283,51 +702,32 @@
     let pointerY = 0;
     let lastTime = performance.now();
     let frame = 0;
-    const zoomMatch = window.matchMedia(
-      "(min-width: 701px) and (hover: hover) and (pointer: fine)"
-    );
-    let zoomed = false;
-    let startX = 0;
-    let startY = 0;
 
-    function setZoomed(next) {
-      if (zoomed === next) return;
-      zoomed = next;
-      root.classList.toggle("crt-zoomed", zoomed);
-      if (zoomed) {
-        dragging = false;
-        idleResumeAt = Number.POSITIVE_INFINITY;
-      } else {
-        idleResumeAt = performance.now() + 4500;
-      }
+    // Power state — square button toggles the monitor on/off
+    let powerOn = true;
+    let btnPressAt = -Infinity;
+    function applyPower() {
+      ledMat.color.setHex(powerOn ? 0x00ff40 : 0x4a554a);
+      ledMat.emissive.setHex(powerOn ? 0x00d435 : 0x0a120b);
+      ledMat.emissiveIntensity = powerOn ? 3.6 : 0.12;
+      screenLight.intensity = powerOn ? 1.6 : 0;
+      glass.emissiveIntensity = powerOn ? 0.22 : 0.03;
+      glass.color.setHex(powerOn ? 0x0e1411 : 0x0a0d0b);
     }
+    function togglePower() {
+      powerOn = !powerOn;
+      btnPressAt = performance.now();
+      applyPower();
+    }
+    applyPower();
 
-    document.addEventListener("crt:zoom", () => setZoomed(true));
-    document.addEventListener("crt:unzoom", () => setZoomed(false));
-    const screenWorldSize = { width: 6.02, height: 3.62 };
-    // Render the DOM overlay at a useful resolution before projecting it onto the glass.
+    const screenWorldSize = { width: 5.92, height: 3.54 };
     const screenSize = { width: 960, height: 576 };
     const screenCorners = [
-      new THREE.Vector3(
-        -screenWorldSize.width / 2,
-        screenWorldSize.height / 2,
-        0.18
-      ),
-      new THREE.Vector3(
-        screenWorldSize.width / 2,
-        screenWorldSize.height / 2,
-        0.18
-      ),
-      new THREE.Vector3(
-        screenWorldSize.width / 2,
-        -screenWorldSize.height / 2,
-        0.18
-      ),
-      new THREE.Vector3(
-        -screenWorldSize.width / 2,
-        -screenWorldSize.height / 2,
-        0.18
-      ),
+      new THREE.Vector3(-screenWorldSize.width / 2, screenWorldSize.height / 2, 0.09),
+      new THREE.Vector3(screenWorldSize.width / 2, screenWorldSize.height / 2, 0.09),
+      new THREE.Vector3(screenWorldSize.width / 2, -screenWorldSize.height / 2, 0.09),
+      new THREE.Vector3(-screenWorldSize.width / 2, -screenWorldSize.height / 2, 0.09),
     ];
 
     function homography(source, target) {
@@ -364,25 +764,19 @@
       const height = root.clientHeight;
       monitor.updateMatrixWorld(true);
       const screenWorld = screenMesh.getWorldPosition(new THREE.Vector3());
-      const normal = new THREE.Vector3(0, 0, 1).transformDirection(
-        screenMesh.matrixWorld
-      );
+      const normal = new THREE.Vector3(0, 0, 1).transformDirection(screenMesh.matrixWorld);
       const toCamera = camera.position.clone().sub(screenWorld).normalize();
       const facing = normal.dot(toCamera);
-      if (facing < 0.08 || width === 0 || height === 0) {
+      if (facing < 0.06 || width === 0 || height === 0) {
         screenLayer.style.opacity = "0";
-        if (artifactLayer instanceof HTMLElement)
-          artifactLayer.style.opacity = "0";
+        if (artifactLayer instanceof HTMLElement) artifactLayer.style.opacity = "0";
         return;
       }
       const projected = screenCorners.map((corner) => {
         const point = corner.clone();
         screenMesh.localToWorld(point);
         point.project(camera);
-        return {
-          x: (point.x * 0.5 + 0.5) * width,
-          y: (-point.y * 0.5 + 0.5) * height,
-        };
+        return { x: (point.x * 0.5 + 0.5) * width, y: (-point.y * 0.5 + 0.5) * height };
       });
       const source = [
         { x: 0, y: 0 },
@@ -391,34 +785,19 @@
         { x: 0, y: screenSize.height },
       ];
       const h = homography(source, projected);
-      const matrix = [
-        h[0],
-        h[3],
-        0,
-        h[6],
-        h[1],
-        h[4],
-        0,
-        h[7],
-        0,
-        0,
-        1,
-        0,
-        h[2],
-        h[5],
-        0,
-        1,
-      ];
+      const matrix = [h[0], h[3], 0, h[6], h[1], h[4], 0, h[7], 0, 0, 1, 0, h[2], h[5], 0, 1];
       const transform = `matrix3d(${matrix.join(",")})`;
       screenLayer.style.width = `${screenSize.width}px`;
       screenLayer.style.height = `${screenSize.height}px`;
       screenLayer.style.transform = transform;
-      screenLayer.style.opacity = String(Math.min(1, facing * 3));
+      const visibility = powerOn ? Math.min(1, facing * 2.2) : 0;
+      screenLayer.style.opacity = String(visibility);
+      screenLayer.style.pointerEvents = powerOn ? "auto" : "none";
       if (artifactLayer instanceof HTMLElement) {
         artifactLayer.style.width = `${screenSize.width}px`;
         artifactLayer.style.height = `${screenSize.height}px`;
         artifactLayer.style.transform = transform;
-        artifactLayer.style.opacity = String(Math.min(1, facing * 3));
+        artifactLayer.style.opacity = String(visibility);
       }
     }
 
@@ -436,51 +815,67 @@
       const delta = Math.min((time - lastTime) / 1000, 0.05);
       lastTime = time;
       if (!reducedMotion.matches && !dragging && time > idleResumeAt) {
-        orbit.targetYaw = THREE.MathUtils.clamp(
-          idle.yaw + Math.sin(time * 0.00042) * 0.065,
-          yawBounds.min,
-          yawBounds.max
-        );
+        // Idle drifts around current yaw, not snapped to fixed -0.24
+        orbit.targetYaw += Math.sin(time * 0.00035) * 0.0012;
         orbit.targetPitch = THREE.MathUtils.clamp(
           idle.pitch + Math.sin(time * 0.00031 + 1.2) * 0.018,
           pitchBounds.min,
           pitchBounds.max
         );
       }
-      orbit.yaw = THREE.MathUtils.damp(orbit.yaw, orbit.targetYaw, 4.5, delta);
-      orbit.pitch = THREE.MathUtils.damp(
-        orbit.pitch,
-        orbit.targetPitch,
-        4.5,
-        delta
-      );
+      orbit.yaw = THREE.MathUtils.damp(orbit.yaw, orbit.targetYaw, 4.2, delta);
+      orbit.pitch = THREE.MathUtils.damp(orbit.pitch, orbit.targetPitch, 4.2, delta);
+      // Wrap yaw to keep numbers stable but allow 360
+      if (orbit.yaw > Math.PI) { orbit.yaw -= Math.PI * 2; orbit.targetYaw -= Math.PI * 2; }
+      if (orbit.yaw < -Math.PI) { orbit.yaw += Math.PI * 2; orbit.targetYaw += Math.PI * 2; }
       monitor.rotation.set(orbit.pitch, orbit.yaw, 0);
-      if (!zoomed) {
-        renderer.render(scene, camera);
-        projectScreen();
-      }
+      // power button press — nudge in, spring back
+      const press = Math.max(0, 1 - (time - btnPressAt) / 180);
+      powerBtn.position.z = 2.53 - press * 0.035;
+      icon.position.z = 2.565 - press * 0.035;
+      camera.position.set(0, 1.45, 20.5);
+      camera.lookAt(0, 1.15, 0);
+      renderer.render(scene, camera);
+      projectScreen();
       frame = requestAnimationFrame(animate);
     }
 
+    const raycaster = new THREE.Raycaster();
+    const pointerNdc = new THREE.Vector2();
+    let downX = 0;
+    let downY = 0;
+    function setPointerFromEvent(event) {
+      const rect = canvas.getBoundingClientRect();
+      pointerNdc.set(
+        ((event.clientX - rect.left) / rect.width) * 2 - 1,
+        -((event.clientY - rect.top) / rect.height) * 2 + 1
+      );
+    }
+    function hitPowerButton() {
+      raycaster.setFromCamera(pointerNdc, camera);
+      monitor.updateMatrixWorld(true);
+      return raycaster.intersectObject(powerBtn, false).length > 0;
+    }
     function onPointerDown(event) {
-      if (zoomed) return;
       dragging = true;
       idleResumeAt = performance.now() + 4500;
       pointerX = event.clientX;
       pointerY = event.clientY;
-      startX = event.clientX;
-      startY = event.clientY;
+      downX = event.clientX;
+      downY = event.clientY;
       root.setPointerCapture?.(event.pointerId);
     }
     function onPointerMove(event) {
-      if (!dragging) return;
-      orbit.targetYaw = THREE.MathUtils.clamp(
-        orbit.targetYaw + (event.clientX - pointerX) * 0.004,
-        yawBounds.min,
-        yawBounds.max
-      );
+      if (!dragging) {
+        // pointer cursor while hovering the power button
+        setPointerFromEvent(event);
+        root.style.cursor = hitPowerButton() ? "pointer" : "";
+        return;
+      }
+      // 360 deg yaw — no clamp
+      orbit.targetYaw += (event.clientX - pointerX) * 0.007;
       orbit.targetPitch = THREE.MathUtils.clamp(
-        orbit.targetPitch + (event.clientY - pointerY) * 0.005,
+        orbit.targetPitch + (event.clientY - pointerY) * 0.006,
         pitchBounds.min,
         pitchBounds.max
       );
@@ -488,17 +883,12 @@
       pointerY = event.clientY;
     }
     function onPointerUp(event) {
-      if (!zoomed && dragging) {
-        const moved = Math.hypot(
-          event.clientX - startX,
-          event.clientY - startY
-        );
-        if (moved < 7 && zoomMatch.matches) {
-          document.dispatchEvent(new CustomEvent("crt:zoom"));
-        }
-      }
       dragging = false;
       idleResumeAt = performance.now() + 4500;
+      // a click (not a drag) on the square button toggles the power
+      if (Math.hypot(event.clientX - downX, event.clientY - downY) > 6) return;
+      setPointerFromEvent(event);
+      if (hitPowerButton()) togglePower();
     }
 
     const resizeObserver = new ResizeObserver(resize);
@@ -507,20 +897,16 @@
     root.addEventListener("pointermove", onPointerMove);
     root.addEventListener("pointerup", onPointerUp);
     root.addEventListener("pointercancel", onPointerUp);
+
     reducedMotion.addEventListener?.("change", resize);
     resize();
     frame = requestAnimationFrame(animate);
 
-    // Astro can navigate without a full reload; clean up if this island is removed.
-    root.addEventListener(
-      "astro:unmount",
-      () => {
-        cancelAnimationFrame(frame);
-        resizeObserver.disconnect();
-        renderer.dispose();
-      },
-      { once: true }
-    );
+    root.addEventListener("astro:unmount", () => {
+      cancelAnimationFrame(frame);
+      resizeObserver.disconnect();
+      renderer.dispose();
+    }, { once: true });
   });
 </script>
 
@@ -537,103 +923,48 @@
     pointer-events: auto;
     cursor: grab;
     isolation: isolate;
-    transition: opacity 240ms ease;
+    transform-origin: 50% 50%;
   }
-
-  .crt-webgl:active {
-    cursor: grabbing;
+  .crt-webgl:active { cursor: grabbing; }
+  .crt-webgl__canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+  .crt-webgl__screen, .crt-webgl__artifacts {
+    position: absolute; top: 0; left: 0; transform-origin: 0 0; will-change: transform, opacity;
   }
-
-  .crt-webgl.crt-zoomed,
-  .crt-webgl.crt-zoomed:active {
-    cursor: default;
-    opacity: 0;
-  }
-
-  .crt-webgl__canvas {
-    position: absolute;
-    inset: 0;
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-
-  .crt-webgl__screen,
-  .crt-webgl__artifacts {
-    position: absolute;
-    top: 0;
-    left: 0;
-    transform-origin: 0 0;
-    will-change: transform, opacity;
-  }
-
   .crt-webgl__screen {
-    z-index: 2;
-    overflow: hidden;
-    border-radius: 4.25%;
-    opacity: 0;
-    pointer-events: auto;
-    isolation: isolate;
+    z-index: 2; overflow: hidden; border-radius: 3.2%; opacity: 0; pointer-events: auto; isolation: isolate;
   }
-
   .crt-webgl__screen-content {
-    position: relative;
-    z-index: 1;
-    overflow: hidden;
+    position: relative; z-index: 1; overflow: hidden; height: 100%;
+    overflow-y: auto; overflow-x: hidden; scrollbar-width: thin;
+    scrollbar-color: #8ea0b1 #dbe3ea; overscroll-behavior: contain;
   }
-
+  .crt-webgl__screen-content::-webkit-scrollbar { width: 8px; }
+  .crt-webgl__screen-content::-webkit-scrollbar-track { background: #cfd9e2; }
+  .crt-webgl__screen-content::-webkit-scrollbar-thumb {
+    border: 1px solid #7e8fa0; background: linear-gradient(180deg, #eef3f7, #c6d0d9);
+  }
   .crt-webgl__screen-content--distortion {
-    position: absolute;
-    z-index: 2;
-    inset: 0;
-    overflow: hidden;
-    clip-path: polygon(
-      0 0,
-      100% 0,
-      100% 32%,
-      91% 34%,
-      79% 31%,
-      66% 35%,
-      53% 32%,
-      40% 35%,
-      27% 31%,
-      14% 34%,
-      0 32%
-    );
-    filter: url("#crt-screen-distortion");
-    opacity: 0.34;
-    pointer-events: none;
-    mix-blend-mode: normal;
+    position: absolute; z-index: 2; inset: 0; overflow: hidden;
+    clip-path: polygon(0 0,100% 0,100% 32%,91% 34%,79% 31%,66% 35%,53% 32%,40% 35%,27% 31%,14% 34%,0 32%);
+    filter: url("#crt-screen-distortion"); opacity: 0.22; pointer-events: none; mix-blend-mode: normal;
+    transform-origin: 50% 20%; animation: crt-image-failure 8.6s ease-in-out infinite;
   }
-
-  .crt-webgl__screen-content > :global(*) {
-    display: block;
-    width: 100%;
-    height: 100%;
+  .crt-webgl__screen-content--arc {
+    position: absolute; z-index: 1; inset: 0; overflow: hidden;
+    filter: url("#crt-screen-arc"); opacity: 0.08; pointer-events: none;
   }
-
-  .crt-webgl__artifacts {
-    z-index: 4;
-    pointer-events: none;
+  @keyframes crt-image-failure {
+    0%,62%,100%{ transform: translate3d(0,0,0) skewX(0deg) scaleY(1); }
+    68%{ transform: translate3d(-1.2px,0.4px,0) skewX(-0.7deg) scaleY(1.018); }
+    72%{ transform: translate3d(1.8px,-0.3px,0) skewX(0.9deg) scaleY(0.986); }
+    78%{ transform: translate3d(-0.6px,0.2px,0) skewX(-0.3deg) scaleY(1.006); }
   }
-
-  .crt-webgl__artifacts > :global(*) {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-
-  @media (max-width: 520px) {
-    .crt-webgl {
-      width: 100%;
-      aspect-ratio: 1.06;
-    }
-  }
-
+  .crt-webgl__screen-content > :global(*) { display: block; width: 100%; height: 100%; }
+  .crt-webgl__artifacts { z-index: 4; pointer-events: none; }
+  .crt-webgl__artifacts > :global(*) { display: block; width: 100%; height: 100%; }
+  @media (max-width: 520px) { .crt-webgl { width: 100%; aspect-ratio: 1.06; } }
   @media (prefers-reduced-motion: reduce) {
-    .crt-webgl {
-      touch-action: auto;
-      transition: none;
-    }
+    .crt-webgl { touch-action: auto; transition: none; }
+    .crt-webgl__screen-content--distortion { animation: none; }
   }
 </style>
