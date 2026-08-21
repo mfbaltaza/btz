@@ -1,0 +1,216 @@
+---
+// Selected Work — editorial index of case studies and hobby projects.
+// Rows invert on hover; descriptions stay collapsed until hover/focus
+// (always visible on touch devices that can't hover).
+import { workEntries } from "../data/work";
+
+const client = workEntries.filter((e) => e.kind === "client");
+const hobby = workEntries.filter((e) => e.kind === "hobby");
+---
+
+<section class="work" aria-labelledby="work-title">
+  <div class="work-head">
+    <p class="work-kicker">03 / Selected Work</p>
+    <h2 id="work-title">Work that<br /><em>shipped.</em></h2>
+    <p class="work-dek">
+      Case studies from teams I've worked with, and the things I build because I
+      can't not.
+    </p>
+  </div>
+
+  {
+    [
+      { label: "Client Work — Case Studies", items: client },
+      { label: "Hobby Projects", items: hobby },
+    ].map((group) => (
+      <div class="work-group">
+        <h3 class="work-group-label">{group.label}</h3>
+        <ol class="work-list">
+          {group.items.map((entry, i) => (
+            <li>
+              <a
+                href="#"
+                class="work-row"
+                aria-label={`${entry.name} — ${entry.role}`}
+              >
+                <span class="row-num">{String(i + 1).padStart(2, "0")}</span>
+                <span class="row-title">{entry.name}</span>
+                <span class="row-role">{entry.role}</span>
+                <span class="row-years">{entry.years}</span>
+                <span class="row-arrow" aria-hidden="true">
+                  ↗
+                </span>
+              </a>
+              <p class="row-blurb">{entry.blurb}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    ))
+  }
+</section>
+
+<style>
+  .work {
+    background: var(--paper);
+    color: var(--ink);
+    padding: 14vh 4vw 12vh;
+    font-family: var(--serif);
+  }
+  .work-head {
+    max-width: 1000px;
+    margin: 0 auto 9vh;
+  }
+  .work-kicker {
+    font: 11px var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    margin: 0 0 28px;
+  }
+  .work-head h2 {
+    font: clamp(3rem, 8vw, 8rem) / 0.85 var(--serif);
+    letter-spacing: -0.07em;
+    font-weight: 400;
+    margin: 0 0 26px;
+  }
+  .work-head em {
+    font-style: italic;
+  }
+  .work-dek {
+    font: 16px/1.55 var(--serif);
+    color: var(--ink-soft);
+    max-width: 420px;
+    margin: 0;
+  }
+
+  .work-group {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .work-group + .work-group {
+    margin-top: 9vh;
+  }
+  .work-group-label {
+    font: 11px var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 10px;
+    margin: 0 0 6px;
+    font-weight: 400;
+  }
+  .work-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .work-list li + li {
+    border-top: 1px solid var(--rule);
+  }
+  .work-row {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr) auto auto 2rem;
+    gap: 18px;
+    align-items: baseline;
+    padding: 30px 8px 22px;
+    color: inherit;
+    text-decoration: none;
+    position: relative;
+  }
+  .row-num {
+    font: 11px var(--mono);
+    color: var(--ink-soft);
+  }
+  .row-title {
+    font: clamp(1.7rem, 3.4vw, 2.9rem) / 1 var(--serif);
+    letter-spacing: -0.03em;
+  }
+  .row-role,
+  .row-years {
+    font: 11px var(--mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+  .row-arrow {
+    justify-self: end;
+    color: var(--accent-ink);
+    opacity: 0;
+    transform: translate(-6px, 4px);
+    transition: opacity 160ms ease-out, transform 160ms ease-out;
+  }
+
+  /* Description collapsed by default; expands on row hover or keyboard
+     focus. Always expanded on devices without hover (touch). */
+  .row-blurb {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    margin: -14px 0 0 calc(3rem + 26px);
+    font: 14px/1.5 var(--serif);
+    color: var(--ink-soft);
+    max-width: 560px;
+    transition: max-height 220ms cubic-bezier(0.23, 1, 0.32, 1),
+      opacity 220ms ease-out, margin-top 220ms ease-out;
+  }
+  .row-blurb::before {
+    content: "";
+    display: block;
+    height: 4px;
+  }
+  .work-list li:hover .row-blurb,
+  .work-list li:focus-within .row-blurb {
+    max-height: 10em;
+    opacity: 1;
+    margin-top: -10px;
+  }
+  @media (hover: none) {
+    .row-blurb {
+      max-height: 10em;
+      opacity: 1;
+      margin-top: -10px;
+    }
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .work-row {
+      transition: background-color 160ms ease-out, color 160ms ease-out;
+    }
+    .work-row:hover {
+      background: var(--ink);
+      color: var(--paper);
+    }
+    .work-row:hover .row-num,
+    .work-row:hover .row-role,
+    .work-row:hover .row-years {
+      color: #b9b3aa;
+    }
+    .work-row:hover .row-arrow {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .work-row {
+      grid-template-columns: 2rem minmax(0, 1fr) 2rem;
+    }
+    .row-role,
+    .row-years {
+      display: none;
+    }
+    .row-blurb {
+      margin-left: calc(2rem + 18px);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .row-arrow,
+    .work-row,
+    .row-blurb {
+      transition: none;
+    }
+  }
+</style>
