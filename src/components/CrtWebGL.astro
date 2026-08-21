@@ -295,11 +295,11 @@
     );
     icon.position.set(2.45, 0.07, 2.565);
     monitor.add(icon);
-    // LED dot — self-lit power light left of button, no light spill
+    // LED dot — self-lit standby light left of button, no light spill
     const ledMat = new THREE.MeshStandardMaterial({
-      color: 0x00ff40,
-      emissive: 0x00d435,
-      emissiveIntensity: 3.6,
+      color: 0x4a554a,
+      emissive: 0x0a120b,
+      emissiveIntensity: 0.12,
       roughness: 0.3,
     });
     const led = new THREE.Mesh(
@@ -700,9 +700,10 @@
     let powerOn = true;
     let btnPressAt = -Infinity;
     function applyPower() {
-      ledMat.color.setHex(powerOn ? 0x00ff40 : 0x4a554a);
-      ledMat.emissive.setHex(powerOn ? 0x00d435 : 0x0a120b);
-      ledMat.emissiveIntensity = powerOn ? 3.6 : 0.12;
+      // LED off while running, amber while standing by
+      ledMat.color.setHex(powerOn ? 0x4a554a : 0xffb020);
+      ledMat.emissive.setHex(powerOn ? 0x0a120b : 0xff9500);
+      ledMat.emissiveIntensity = powerOn ? 0.12 : 2.6;
       screenLight.intensity = powerOn ? 1.6 : 0;
       glass.emissiveIntensity = powerOn ? 0.22 : 0.03;
       glass.color.setHex(powerOn ? 0x0e1411 : 0x0a0d0b);
