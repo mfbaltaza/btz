@@ -155,19 +155,26 @@ const hobby = workEntries.filter((e) => e.kind === "hobby");
     color: var(--ink-soft);
     max-width: 560px;
     transition: max-height 220ms cubic-bezier(0.23, 1, 0.32, 1),
-      opacity 220ms ease-out, margin-bottom 220ms ease-out;
+      opacity 160ms ease-out, margin-bottom 220ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  /* Air between the inverted row and its description; lives inside the
+     clipped box so it collapses to nothing. */
+  .row-blurb::before {
+    content: "";
+    display: block;
+    height: 16px;
   }
   .work-list li:hover .row-blurb,
   .work-list li:focus-within .row-blurb {
     max-height: 10em;
     opacity: 1;
-    margin-bottom: 24px;
+    margin-bottom: 22px;
   }
   @media (hover: none) {
     .row-blurb {
       max-height: 10em;
       opacity: 1;
-      margin-bottom: 24px;
+      margin-bottom: 22px;
     }
   }
 
