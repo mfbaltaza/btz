@@ -18,8 +18,8 @@
 <style>
   .ghost-page {
     position: relative;
-    background: #e9e4dc;
-    color: #161616;
+    background: var(--paper);
+    color: var(--ink);
     padding: 26px 4vw;
     min-height: 100svh;
     display: flex;
@@ -33,21 +33,21 @@
   .ghost-nav {
     display: flex;
     justify-content: space-between;
-    font: 11px ui-monospace, SFMono-Regular, Menlo, monospace;
+    font: 11px var(--mono);
     letter-spacing: 0.06em;
-    border-bottom: 1px solid #aaa49b;
+    border-bottom: 1px solid var(--rule);
     padding-bottom: 15px;
   }
   .ghost-number {
     position: absolute;
     right: -3vw;
     bottom: -8vh;
-    font: clamp(20rem, 38vw, 42rem) / 0.75 Georgia, serif;
+    font: clamp(20rem, 38vw, 42rem) / 0.75 var(--serif);
     letter-spacing: -0.06em;
-    color: #d6cfc1;
+    color: var(--mark-ink);
     z-index: 0;
     user-select: none;
-    animation: enter 420ms cubic-bezier(0.23, 1, 0.32, 1) 60ms both;
+    animation: enter var(--enter-duration) var(--enter-easing) 60ms both;
   }
   .ghost-main {
     position: relative;
@@ -59,19 +59,19 @@
     max-width: 1000px;
   }
   .ghost-kicker {
-    font: 600 13px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+    font: 600 13px/1.4 var(--mono);
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: #b22d25;
+    color: var(--accent-ink);
     margin: 0 0 34px;
-    animation: enter 420ms cubic-bezier(0.23, 1, 0.32, 1) both;
+    animation: enter var(--enter-duration) var(--enter-easing) both;
   }
   .ghost-page h1 {
-    font: clamp(4rem, 9vw, 9.5rem) / 0.85 Georgia, serif;
+    font: clamp(4rem, 9vw, 9.5rem) / 0.85 var(--serif);
     letter-spacing: -0.07em;
     font-weight: 400;
     margin: 0;
-    animation: enter 420ms cubic-bezier(0.23, 1, 0.32, 1) 50ms both;
+    animation: enter var(--enter-duration) var(--enter-easing) 50ms both;
   }
   .ghost-page h1 em {
     font-style: italic;
@@ -81,19 +81,19 @@
     gap: 10vw;
     margin-top: 55px;
     max-width: 680px;
-    font: 16px/1.5 Georgia, serif;
-    animation: enter 420ms cubic-bezier(0.23, 1, 0.32, 1) 100ms both;
+    font: 16px/1.5 var(--serif);
+    animation: enter var(--enter-duration) var(--enter-easing) 100ms both;
   }
   .ghost-bottom p {
     margin: 0;
     max-width: 390px;
-    color: #5f5a52;
+    color: var(--ink-soft);
   }
   .ghost-actions {
     align-self: flex-end;
     display: flex;
     gap: 18px;
-    font: 12px ui-monospace, SFMono-Regular, Menlo, monospace;
+    font: 12px var(--mono);
     text-transform: uppercase;
     white-space: nowrap;
   }
@@ -102,24 +102,24 @@
     padding-bottom: 4px;
   }
   .ghost-actions a:first-child {
-    border-color: #b22d25;
+    border-color: var(--accent-ink);
   }
   .ghost-actions span {
-    color: #b22d25;
+    color: var(--accent-ink);
   }
   .ghost-mark {
     position: absolute;
     right: 4vw;
     bottom: 40px;
     z-index: 1;
-    font: 11px ui-monospace, SFMono-Regular, Menlo, monospace;
+    font: 11px var(--mono);
     text-align: right;
   }
   .ghost-mark small {
     font-size: 9px;
     line-height: 1.3;
     display: block;
-    color: #777;
+    color: var(--muted);
   }
 
   @media (hover: hover) and (pointer: fine) {
@@ -127,7 +127,7 @@
       transition: color 160ms ease-out, border-color 160ms ease-out;
     }
     .ghost-actions a:hover {
-      color: #b22d25;
+      color: var(--accent-ink);
     }
     .ghost-actions a:active {
       transform: scale(0.97);

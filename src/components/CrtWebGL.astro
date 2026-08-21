@@ -1,7 +1,7 @@
 <div
   class="crt-webgl"
   data-crt-webgl
-  aria-label="Three-dimensional CRT monitor"
+  aria-label="Three-dimensional monitor"
 >
   <canvas class="crt-webgl__canvas" data-crt-canvas aria-hidden="true"></canvas>
   <div class="crt-webgl__screen" data-crt-screen>
@@ -32,25 +32,18 @@
       ".crt-webgl__screen-content"
     );
     if (screenContent instanceof HTMLElement) {
-      const distortionCopy = screenContent.cloneNode(true);
-      if (distortionCopy instanceof HTMLElement) {
-        distortionCopy.classList.add("crt-webgl__screen-content--distortion");
-        distortionCopy.setAttribute("aria-hidden", "true");
-        distortionCopy.querySelectorAll("a, button").forEach((element) => {
+      function cloneAsShadow(suffix) {
+        const copy = screenContent.cloneNode(true);
+        if (!(copy instanceof HTMLElement)) return;
+        copy.classList.add(`crt-webgl__screen-content--${suffix}`);
+        copy.setAttribute("aria-hidden", "true");
+        copy.querySelectorAll("a, button").forEach((element) => {
           element.setAttribute("tabindex", "-1");
         });
-        screenLayer.appendChild(distortionCopy);
-
-        const arcCopy = screenContent.cloneNode(true);
-        if (arcCopy instanceof HTMLElement) {
-          arcCopy.classList.add("crt-webgl__screen-content--arc");
-          arcCopy.setAttribute("aria-hidden", "true");
-          arcCopy.querySelectorAll("a, button").forEach((element) => {
-            element.setAttribute("tabindex", "-1");
-          });
-          screenLayer.appendChild(arcCopy);
-        }
+        screenLayer.appendChild(copy);
       }
+      cloneAsShadow("distortion");
+      cloneAsShadow("arc");
 
       screenLayer.addEventListener(
         "wheel",
@@ -186,7 +179,7 @@
     roundedBox(8.7, 6.2, 4.55, 0.09, bodyMaterial, [0, 2.15, 0], shellSegments);
     // Front bezel — thick white frame, flat as in photo
     roundedBox(7.95, 5.55, 0.38, 0.06, edgeMaterial, [0, 2.24, 2.22], bevelSegments);
-    // Screen recess — deep inset shadow
+    // Glass recess — deep inset shadow
     roundedBox(6.58, 4.42, 0.28, 0.04, darkMaterial, [0, 2.43, 2.38], bevelSegments);
 
     const screenShape = new THREE.Shape();
@@ -244,7 +237,7 @@
     screenMesh.receiveShadow = true;
     monitor.add(screenMesh);
 
-    // Screen inner glow rim — subtle edge highlight
+    // Glass inner glow rim — subtle edge highlight
     const innerBezel = new THREE.Mesh(
       new RoundedBoxGeometry(6.22, 3.92, 0.06, bevelSegments, 0.03),
       new THREE.MeshStandardMaterial({
@@ -787,18 +780,15 @@
       const h = homography(source, projected);
       const matrix = [h[0], h[3], 0, h[6], h[1], h[4], 0, h[7], 0, 0, 1, 0, h[2], h[5], 0, 1];
       const transform = `matrix3d(${matrix.join(",")})`;
-      screenLayer.style.width = `${screenSize.width}px`;
-      screenLayer.style.height = `${screenSize.height}px`;
-      screenLayer.style.transform = transform;
       const visibility = powerOn ? Math.min(1, facing * 2.2) : 0;
-      screenLayer.style.opacity = String(visibility);
+      [screenLayer, artifactLayer].forEach((layer) => {
+        if (!(layer instanceof HTMLElement)) return;
+        layer.style.width = `${screenSize.width}px`;
+        layer.style.height = `${screenSize.height}px`;
+        layer.style.transform = transform;
+        layer.style.opacity = String(visibility);
+      });
       screenLayer.style.pointerEvents = powerOn ? "auto" : "none";
-      if (artifactLayer instanceof HTMLElement) {
-        artifactLayer.style.width = `${screenSize.width}px`;
-        artifactLayer.style.height = `${screenSize.height}px`;
-        artifactLayer.style.transform = transform;
-        artifactLayer.style.opacity = String(visibility);
-      }
     }
 
     function resize() {

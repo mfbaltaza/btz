@@ -7,13 +7,13 @@ import LegacyPage from "./LegacyPage.astro";
 <aside
   class="crt-wrap"
   data-crt-wrap
-  aria-label="A 2005 version of this portfolio rendered on a CRT monitor"
+  aria-label="A 2005 version of this portfolio rendered on a monitor"
 >
   <CrtWebGL>
     <LegacyPage slot="screen" />
     <CrtArtifacts slot="artifacts" />
   </CrtWebGL>
-  <p class="crt-caption"><span>DISPLAY_01</span> / SIGNAL FOUND</p>
+  <p class="crt-caption"><span>MONITOR_01</span> / SIGNAL FOUND</p>
   <p class="crt-hint" aria-hidden="true">
     <span>Drag to orbit</span>
   </p>
@@ -103,6 +103,7 @@ import LegacyPage from "./LegacyPage.astro";
     .crt-caption {
       right: 2%;
       bottom: 0;
+      display: none;
     }
   }
 
