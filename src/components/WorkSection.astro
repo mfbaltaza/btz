@@ -1,14 +1,16 @@
 ---
 // Selected Work — editorial index of case studies and hobby projects.
-// Rows invert on hover; descriptions stay collapsed until hover/focus
-// (always visible on touch devices that can't hover).
+// Each row is a disclosure (APG accordion pattern): the description opens
+// on click / tap / Enter / Space, never on hover, so pointing at a row
+// can't push the rows beneath it around. Panels open independently, so
+// opening one never moves anything above the row you acted on.
 import { workEntries } from "../data/work";
 
 const client = workEntries.filter((e) => e.kind === "client");
 const hobby = workEntries.filter((e) => e.kind === "hobby");
 ---
 
-<section class="work" aria-labelledby="work-title">
+<section class="work" aria-labelledby="work-title" data-work>
   <div class="work-head">
     <p class="work-kicker">03 / Selected Work</p>
     <h2 id="work-title">Work that<br /><em>shipped.</em></h2>
@@ -28,20 +30,33 @@ const hobby = workEntries.filter((e) => e.kind === "hobby");
         <ol class="work-list">
           {group.items.map((entry, i) => (
             <li>
-              <a
-                href="#"
-                class="work-row"
-                aria-label={`${entry.name} — ${entry.role}`}
+              <h4 class="row-heading">
+                <button
+                  type="button"
+                  class="work-row"
+                  aria-expanded="false"
+                  aria-controls={`work-${entry.id}`}
+                  id={`work-${entry.id}-label`}
+                >
+                  <span class="row-num" aria-hidden="true">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span class="row-title">{entry.name}</span>
+                  <span class="row-role">{entry.role}</span>
+                  <span class="row-years">{entry.years}</span>
+                  <span class="row-toggle" aria-hidden="true" />
+                </button>
+              </h4>
+              <div
+                class="row-panel"
+                id={`work-${entry.id}`}
+                role="region"
+                aria-labelledby={`work-${entry.id}-label`}
               >
-                <span class="row-num">{String(i + 1).padStart(2, "0")}</span>
-                <span class="row-title">{entry.name}</span>
-                <span class="row-role">{entry.role}</span>
-                <span class="row-years">{entry.years}</span>
-                <span class="row-arrow" aria-hidden="true">
-                  ↗
-                </span>
-              </a>
-              <p class="row-blurb">{entry.blurb}</p>
+                <div class="row-panel-clip">
+                  <p class="row-blurb">{entry.blurb}</p>
+                </div>
+              </div>
             </li>
           ))}
         </ol>
@@ -109,15 +124,28 @@ const hobby = workEntries.filter((e) => e.kind === "hobby");
   .work-list li + li {
     border-top: 1px solid var(--rule);
   }
+  /* Row heading — resets so the h4 only carries semantics. */
+  .row-heading {
+    margin: 0;
+    font: inherit;
+  }
   .work-row {
     display: grid;
     grid-template-columns: 3rem minmax(0, 1fr) auto auto 2rem;
     gap: 18px;
     align-items: baseline;
-    padding: 30px 8px 22px;
+    width: 100%;
+    padding: 26px 8px;
+    border: 0;
+    background: none;
     color: inherit;
-    text-decoration: none;
-    position: relative;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .work-row:focus-visible {
+    outline: 2px solid var(--accent-ink);
+    outline-offset: 2px;
   }
   .row-num {
     font: 11px var(--mono);
@@ -135,47 +163,64 @@ const hobby = workEntries.filter((e) => e.kind === "hobby");
     color: var(--ink-soft);
     white-space: nowrap;
   }
-  .row-arrow {
+
+  /* Plus that folds into a minus — tells you the row opens, and which
+     ones are open, without relying on hover. */
+  .row-toggle {
     justify-self: end;
+    align-self: center;
+    position: relative;
+    width: 12px;
+    height: 12px;
     color: var(--accent-ink);
-    opacity: 0;
-    transform: translate(-6px, 4px);
-    transition: opacity 160ms ease-out, transform 160ms ease-out;
+  }
+  .row-toggle::before,
+  .row-toggle::after {
+    content: "";
+    position: absolute;
+    inset: 5px 0;
+    background: currentColor;
+    transition: transform 260ms var(--enter-easing);
+  }
+  .row-toggle::after {
+    transform: rotate(90deg);
+  }
+  .work-row[aria-expanded="true"] .row-toggle::after {
+    transform: rotate(0deg);
   }
 
-  /* Description collapsed by default; expands on row hover or keyboard
-     focus. Always expanded on devices without hover (touch). Sits fully
-     below the row so the inverted row never covers it. */
-  .row-blurb {
-    max-height: 0;
+  /* Panel animates its real content height (0fr -> 1fr), so open and close
+     run the same distance at the same speed — no max-height guesswork.
+     visibility flips after the close finishes, which also keeps the
+     collapsed text out of the tab order and the accessibility tree. */
+  .row-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    visibility: hidden;
+    transition: grid-template-rows 260ms var(--enter-easing),
+      visibility 0s linear 260ms;
+  }
+  li:has(.work-row[aria-expanded="true"]) .row-panel {
+    grid-template-rows: 1fr;
+    visibility: visible;
+    transition: grid-template-rows 260ms var(--enter-easing), visibility 0s;
+  }
+  .row-panel-clip {
+    min-height: 0;
     overflow: hidden;
-    opacity: 0;
+  }
+  .row-blurb {
     margin: 0 0 0 calc(3rem + 26px);
-    font: 14px/1.5 var(--serif);
-    color: var(--ink-soft);
+    padding: 4px 0 28px;
     max-width: 560px;
-    transition: max-height 220ms cubic-bezier(0.23, 1, 0.32, 1),
-      opacity 160ms ease-out, margin-bottom 220ms cubic-bezier(0.23, 1, 0.32, 1);
+    font: 15px/1.55 var(--serif);
+    color: var(--ink-soft);
+    opacity: 0;
+    transition: opacity 160ms ease-out;
   }
-  /* Air between the inverted row and its description; lives inside the
-     clipped box so it collapses to nothing. */
-  .row-blurb::before {
-    content: "";
-    display: block;
-    height: 16px;
-  }
-  .work-list li:hover .row-blurb,
-  .work-list li:focus-within .row-blurb {
-    max-height: 10em;
+  li:has(.work-row[aria-expanded="true"]) .row-blurb {
     opacity: 1;
-    margin-bottom: 22px;
-  }
-  @media (hover: none) {
-    .row-blurb {
-      max-height: 10em;
-      opacity: 1;
-      margin-bottom: 22px;
-    }
+    transition: opacity 200ms ease-out 60ms;
   }
 
   @media (hover: hover) and (pointer: fine) {
@@ -188,32 +233,62 @@ const hobby = workEntries.filter((e) => e.kind === "hobby");
     }
     .work-row:hover .row-num,
     .work-row:hover .row-role,
-    .work-row:hover .row-years {
+    .work-row:hover .row-years,
+    .work-row:hover .row-toggle {
       color: #b9b3aa;
-    }
-    .work-row:hover .row-arrow {
-      opacity: 1;
-      transform: none;
     }
   }
 
   @media (max-width: 700px) {
     .work-row {
       grid-template-columns: 2rem minmax(0, 1fr) 2rem;
+      padding: 22px 8px;
     }
     .row-role,
     .row-years {
       display: none;
     }
     .row-blurb {
-      margin-left: calc(2rem + 18px);
+      margin-left: calc(2rem + 26px);
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .row-arrow,
     .work-row,
-    .row-blurb {
+    .row-toggle::before,
+    .row-toggle::after,
+    .row-panel,
+    li:has(.work-row[aria-expanded="true"]) .row-panel,
+    .row-blurb,
+    li:has(.work-row[aria-expanded="true"]) .row-blurb {
       transition: none;
     }
   }
 </style>
+
+<!-- Without JS the rows can't toggle, so show every description. -->
+<noscript>
+  <style is:inline>
+    .row-panel {
+      grid-template-rows: 1fr !important;
+      visibility: visible !important;
+    }
+    .row-blurb {
+      opacity: 1 !important;
+    }
+    .row-toggle {
+      display: none !important;
+    }
+  </style>
+</noscript>
+
+<script>
+  // aria-expanded is the single source of truth; CSS reads it via :has().
+  document
+    .querySelectorAll<HTMLButtonElement>("[data-work] .work-row")
+    .forEach((button) => {
+      button.addEventListener("click", () => {
+        const open = button.getAttribute("aria-expanded") === "true";
+        button.setAttribute("aria-expanded", String(!open));
+      });
+    });
+</script>
