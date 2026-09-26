@@ -6,13 +6,12 @@
   <div class="ghost-number" aria-hidden="true">404</div>
   <section class="ghost-main" aria-labelledby="ghost-title">
     <p class="ghost-kicker">Error 404 / Nothing on file</p>
-    <h1 id="ghost-title">This page is<br /><em>no longer on file.</em></h1>
+    <h1 id="ghost-title">This page is<br />no longer on file.</h1>
     <div class="ghost-bottom">
-      <p>The page you're after isn't here. Anyways, the front page is near.</p>
-      <nav class="ghost-actions" aria-label="Portfolio links"><a href="/">Back home <span>←</span></a><a href="https://linkedin.com/in/baltaza" target="_blank" rel="noopener">LinkedIn <span>↗</span></a><a href="https://drive.google.com/file/d/1_VD7rlEnLHo750ggmAMi31mfKWgwJpu1/view?usp=sharing" target="_blank" rel="noopener">CV <span>↓</span></a></nav>
+      <p>The page you’re after isn’t here. The front page is one click away.</p>
+      <nav class="ghost-actions" aria-label="Portfolio links"><a href="/">Back home <span aria-hidden="true">←</span></a><a href="https://linkedin.com/in/baltaza" target="_blank" rel="noopener">LinkedIn <span aria-hidden="true">↗</span><span class="visually-hidden"> (opens in a new tab)</span></a><a href="https://drive.google.com/file/d/1_VD7rlEnLHo750ggmAMi31mfKWgwJpu1/view?usp=sharing" target="_blank" rel="noopener">CV <span aria-hidden="true">↗</span><span class="visually-hidden"> (opens in a new tab)</span></a></nav>
     </div>
   </section>
-  <div class="ghost-mark" aria-hidden="true">04<br /><small>NOT<br />FOUND</small></div>
 </main>
 
 <style>
@@ -67,14 +66,11 @@
     animation: enter var(--enter-duration) var(--enter-easing) both;
   }
   .ghost-page h1 {
-    font: clamp(4rem, 9vw, 9.5rem) / 0.85 var(--serif);
-    letter-spacing: -0.07em;
+    font: clamp(3.5rem, 7vw, 7.5rem) / 0.9 var(--serif);
+    letter-spacing: -0.04em;
     font-weight: 400;
     margin: 0;
     animation: enter var(--enter-duration) var(--enter-easing) 50ms both;
-  }
-  .ghost-page h1 em {
-    font-style: italic;
   }
   .ghost-bottom {
     display: flex;
@@ -107,20 +103,6 @@
   .ghost-actions span {
     color: var(--accent-ink);
   }
-  .ghost-mark {
-    position: absolute;
-    right: 4vw;
-    bottom: 40px;
-    z-index: 1;
-    font: 11px var(--mono);
-    text-align: right;
-  }
-  .ghost-mark small {
-    font-size: 9px;
-    line-height: 1.3;
-    display: block;
-    color: var(--muted);
-  }
 
   @media (hover: hover) and (pointer: fine) {
     .ghost-actions a {
@@ -139,7 +121,7 @@
       display: none;
     }
     .ghost-page h1 {
-      font-size: clamp(3.5rem, 16vw, 7rem);
+      font-size: clamp(3rem, 13vw, 5rem);
     }
     .ghost-number {
       bottom: -4vh;

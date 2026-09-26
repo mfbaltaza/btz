@@ -17,9 +17,6 @@ importers:
       '@astrojs/vercel':
         specifier: ^8.2.1
         version: 8.2.11(astro@5.18.2(@types/node@25.9.3)(@vercel/functions@2.2.13)(jiti@1.21.7)(rollup@4.62.0)(typescript@5.9.3)(yaml@2.9.0))(rollup@4.62.0)
-      '@fontsource/manrope':
-        specifier: ^4.5.12
-        version: 4.5.13
       '@iconify-json/bx':
         specifier: ^1.2.3
         version: 1.2.3
@@ -515,9 +512,6 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
-
-  '@fontsource/manrope@4.5.13':
-    resolution: {integrity: sha512-UFN5DMGBp8nFpwhPQXfpSbsEm4OVISqUKQy+rA+pb1zYGoH+OGN1woKEND8VLx+pC7rY3nrPRCJvSuuOaNdW7Q==}
 
   '@iconify-json/bx@1.2.3':
     resolution: {integrity: sha512-ihvX+2d688otgW7MAvUEdKVln+fZ28BJTlygazKUU/+RCODWT+2KObjAHe8+KPs4VhC8V6Tgoy1qrX0Myn/upA==}
@@ -3198,8 +3192,6 @@ snapshots:
 
   '@esbuild/win32-x64@0.27.7':
     optional: true
-
-  '@fontsource/manrope@4.5.13': {}
 
   '@iconify-json/bx@1.2.3':
     dependencies:

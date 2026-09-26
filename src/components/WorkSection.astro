@@ -13,10 +13,10 @@ const hobby = workEntries.filter((e) => e.kind === "hobby");
 <section class="work" aria-labelledby="work-title" data-work>
   <div class="work-head">
     <p class="work-kicker">03 / Selected Work</p>
-    <h2 id="work-title">Work that<br /><em>shipped.</em></h2>
+    <h2 id="work-title">Work that shipped.</h2>
     <p class="work-dek">
-      Case studies from teams I've worked with, and the things I build because I
-      can't not.
+      Case studies from teams I’ve worked with, and the things I build because I
+      can’t not.
     </p>
   </div>
 
@@ -84,13 +84,10 @@ const hobby = workEntries.filter((e) => e.kind === "hobby");
     margin: 0 0 28px;
   }
   .work-head h2 {
-    font: clamp(3rem, 8vw, 8rem) / 0.85 var(--serif);
-    letter-spacing: -0.07em;
+    font: clamp(2.6rem, 5vw, 4.75rem) / 0.95 var(--serif);
+    letter-spacing: -0.035em;
     font-weight: 400;
     margin: 0 0 26px;
-  }
-  .work-head em {
-    font-style: italic;
   }
   .work-dek {
     font: 16px/1.55 var(--serif);
@@ -235,7 +232,7 @@ const hobby = workEntries.filter((e) => e.kind === "hobby");
     .work-row:hover .row-role,
     .work-row:hover .row-years,
     .work-row:hover .row-toggle {
-      color: #b9b3aa;
+      color: var(--ink-soft-inverse);
     }
   }
 

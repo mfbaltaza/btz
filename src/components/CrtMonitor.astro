@@ -24,13 +24,16 @@ import LegacyPage from "./LegacyPage.astro";
     position: absolute;
     z-index: 1;
     top: 50%;
+    /* Right edge sits 3vw in from the page edge. 100cqw is the Hero shell's
+       content box (see .editorial-shell), which, unlike 100vw, excludes the
+       scrollbar; + 8vw adds back the shell's side padding. */
     right: calc(100% - 100vw + 7vw);
+    right: calc(100% - 100cqw - 8vw + 7vw);
     width: min(43vw, 660px);
     box-sizing: border-box;
     overflow: visible;
     transform: translateY(-46%);
     pointer-events: auto;
-    transition: background 260ms ease, backdrop-filter 260ms ease;
   }
 
   .crt-wrap > :global(.crt-webgl) {
@@ -49,14 +52,14 @@ import LegacyPage from "./LegacyPage.astro";
     /* tucked just under the foot — the canvas keeps orbit headroom below it */
     bottom: 9%;
     margin: 0;
-    color: #8a847c;
-    font: 9px ui-monospace, SFMono-Regular, Menlo, monospace;
-    letter-spacing: 0.12em;
+    color: var(--ink-soft);
+    font: 11px var(--mono);
+    letter-spacing: 0.08em;
     pointer-events: none;
   }
 
   .crt-caption span {
-    color: #b22d25;
+    color: var(--accent-ink);
   }
 
   .crt-hint {
@@ -65,9 +68,9 @@ import LegacyPage from "./LegacyPage.astro";
     left: 4%;
     bottom: 9%;
     margin: 0;
-    color: #8a847c;
-    font: 9px ui-monospace, SFMono-Regular, Menlo, monospace;
-    letter-spacing: 0.12em;
+    color: var(--ink-soft);
+    font: 11px var(--mono);
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     white-space: nowrap;
     opacity: 0;
@@ -101,7 +104,6 @@ import LegacyPage from "./LegacyPage.astro";
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .crt-wrap,
     .crt-hint {
       transition: none;
     }

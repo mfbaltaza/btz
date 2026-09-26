@@ -2,41 +2,67 @@
 import CrtMonitor from "./CrtMonitor.astro";
 ---
 
-<main class="editorial-shell">
+<div class="editorial-shell">
   <header class="editorial-bar">
     <span>JUAN ARAUJO</span><span>ENGINEERING × PRODUCT</span><span
-      >2020 — PRESENT</span
+      >2020 – PRESENT</span
     >
   </header>
   <section class="editorial-main" aria-labelledby="hero-title">
-   <h1 id="hero-title">The web should<br /><em>feel good.</em></h1>
+    <h1 id="hero-title">The web should<br /><em>feel good.</em></h1>
     <div class="editorial-bottom">
       <nav class="editorial-actions" aria-label="Portfolio links">
-        <a href="#story">Read the story <span>↗</span></a><a
+        <a href="#story">Read the story <span aria-hidden="true">↓</span></a><a
           href="https://linkedin.com/in/baltaza"
           target="_blank"
-          rel="noopener">LinkedIn <span>↗</span></a
+          rel="noopener"
+          >LinkedIn <span aria-hidden="true">↗</span><span
+            class="visually-hidden"
+          >
+            (opens in a new tab)</span
+          ></a
         ><a
           href="https://drive.google.com/file/d/1_VD7rlEnLHo750ggmAMi31mfKWgwJpu1/view?usp=sharing"
           target="_blank"
-          rel="noopener">CV <span>↓</span></a
+          rel="noopener"
+          >CV <span aria-hidden="true">↗</span><span class="visually-hidden">
+            (opens in a new tab)</span
+          ></a
         >
       </nav>
     </div>
     <CrtMonitor />
   </section>
   <div class="editorial-mark" aria-hidden="true">
-    01<br /><small>SELECTED<br />WORK</small>
+    01<br /><small>INTRODUCTION</small>
   </div>
-</main>
+</div>
 <section class="story" id="story" aria-labelledby="story-title">
-  <div class="story-meta">02 / A SHORT NOTE</div><article>
-    <p class="story-kicker">Why I work</p><h2 id="story-title">
-      Good software<br /><em>changes your life.</em>
-    </h2><p>
-    Since I was a kid, I've been tinkering with tech; I've grown fixated on tech products and how they can change your life. This could've been a Nintendo product, a new website, a new game, or something shiny that could change my day-to-day use, like a new Android ROM. I wanted to make something out of that. I figured that I could live my life not only experiencing how tech could potentially change my day-to-day, but how I could change the lives of many other people and share some of that joy.</p><p>
-    So I'm here; I'm Juan, nice to meet you. A software engineer with an obsession and immense passion for the field. I care if something has my name or my team name on it. I take pride in what I do; for you as a potential employer, that translates to agency and creativity with a lot of ownership. Somebody to lift you. That only if you can pick my interest.</p><p>
-    I'm currently tinkering full-time, meaning I'm unemployed. So, I'm looking for an awesome team that values craft, ownership, and that enjoys building product. Just as much as I do.   </p><p class="story-signoff">Juan Araujo</p>
+  <p class="story-meta">02 / A short note</p>
+  <article>
+    <h2 id="story-title">Good software changes your life.</h2>
+    <p>
+      Since I was a kid, I’ve been tinkering with tech; I’ve grown fixated on
+      tech products and how they can change your life. This could’ve been a
+      Nintendo product, a new website, a new game, or something shiny that could
+      change my day-to-day use, like a new Android ROM. I wanted to make
+      something out of that. I figured that I could live my life not only
+      experiencing how tech could potentially change my day-to-day, but how I
+      could change the lives of many other people and share some of that joy.
+    </p>
+    <p>
+      So I’m here; I’m Juan, nice to meet you. A software engineer with an
+      obsession and immense passion for the field. I care if something has my
+      name or my team name on it. I take pride in what I do; for you as a
+      potential employer, that translates to agency and creativity with a lot of
+      ownership. Somebody to lift you. That is, if you can pique my interest.
+    </p>
+    <p>
+      I’m currently tinkering full-time, meaning I’m unemployed. So, I’m looking
+      for an awesome team that values craft, ownership, and that enjoys building
+      product. Just as much as I do.
+    </p>
+    <p class="story-signoff">Juan Araujo</p>
   </article>
 </section>
 <style>
@@ -46,6 +72,9 @@ import CrtMonitor from "./CrtMonitor.astro";
     color: var(--ink);
     background: var(--paper);
     position: relative;
+    /* Size container so the Monitor can measure the page width without the
+       scrollbar (100cqw) — see CrtMonitor.astro. */
+    container-type: inline-size;
   }
   .editorial-bar {
     display: flex;
@@ -64,24 +93,18 @@ import CrtMonitor from "./CrtMonitor.astro";
     position: relative;
     z-index: 2;
   }
-  .editorial-kicker,
   .editorial-shell h1,
   .editorial-bottom {
     position: relative;
     z-index: 2;
   }
-  .editorial-kicker {
-    font: 14px/1.35 var(--mono);
-    margin: 0 0 34px;
-  }
   .editorial-shell h1 {
-    font: clamp(4rem, 10vw, 10.5rem) / 0.82 var(--serif);
-    letter-spacing: -0.07em;
+    font: clamp(4rem, 9vw, 9.5rem) / 0.86 var(--serif);
+    letter-spacing: -0.04em;
     font-weight: 400;
     margin: 0;
   }
-  .editorial-shell h1 em,
-  .story h2 em {
+  .editorial-shell h1 em {
     font-style: italic;
   }
   .editorial-bottom {
@@ -123,36 +146,37 @@ import CrtMonitor from "./CrtMonitor.astro";
     text-align: right;
   }
   .editorial-mark small {
-    font-size: 9px;
+    font-size: 11px;
     line-height: 1.3;
+    letter-spacing: 0.06em;
     display: block;
-    color: #777;
+    color: var(--ink-soft);
   }
   .story {
-    background: #f5f1e9;
-    color: #211e1a;
+    background: var(--paper-raised);
+    color: var(--ink);
     padding: 14vh 7vw 18vh;
     display: grid;
     grid-template-columns: 1fr 2fr;
     gap: 6vw;
   }
-  .story-meta,
-  .story-kicker {
+  .story-meta {
     font: 11px var(--mono);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--accent-ink);
+    margin: 0;
   }
   .story article {
     max-width: 680px;
   }
   .story h2 {
-    font: clamp(2.8rem, 6vw, 6rem) / 0.9 var(--serif);
-    letter-spacing: -0.06em;
+    font: clamp(2.6rem, 5vw, 4.75rem) / 0.95 var(--serif);
+    letter-spacing: -0.035em;
     font-weight: 400;
     margin: 0 0 32px;
   }
-  .story article p:not(.story-kicker):not(.story-signoff) {
+  .story article p:not(.story-signoff) {
     font: 17px/1.65 var(--serif);
     margin: 0 0 22px;
   }
@@ -163,9 +187,6 @@ import CrtMonitor from "./CrtMonitor.astro";
   }
 
   /* Entrance — the shared 420ms cubic-bezier(.23,1,.32,1) token from the prototype. */
-  .editorial-kicker {
-    animation: enter var(--enter-duration) var(--enter-easing) both;
-  }
   .editorial-shell h1 {
     animation: enter var(--enter-duration) var(--enter-easing) 50ms both;
   }
@@ -216,7 +237,7 @@ import CrtMonitor from "./CrtMonitor.astro";
       white-space: normal;
     }
     .editorial-shell h1 {
-      font-size: clamp(3.5rem, 16vw, 7rem);
+      font-size: clamp(3rem, 14vw, 6rem);
     }
     .story {
       display: block;
@@ -226,7 +247,7 @@ import CrtMonitor from "./CrtMonitor.astro";
       margin-bottom: 16vh;
     }
     .story h2 {
-      font-size: clamp(2.8rem, 14vw, 5rem);
+      font-size: clamp(2.5rem, 11vw, 4rem);
     }
   }
 
@@ -248,7 +269,6 @@ import CrtMonitor from "./CrtMonitor.astro";
     .editorial-actions a {
       transition: none;
     }
-    .editorial-kicker,
     .editorial-shell h1,
     .editorial-bottom {
       animation: none;
