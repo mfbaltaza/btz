@@ -230,6 +230,20 @@ import CrtMonitor from "./CrtMonitor.astro";
     }
   }
 
+  /* Stacked — mirrors the CrtMonitor breakpoint: headline, Monitor, links. */
+  @media (max-width: 700px), (max-width: 1100px) and (orientation: portrait) {
+    .editorial-shell {
+      padding-bottom: 88px;
+    }
+    .editorial-main {
+      min-height: calc(100svh - 140px);
+    }
+    .editorial-bottom {
+      order: 2;
+      margin-top: 3vh;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .editorial-actions a {
       transition: none;

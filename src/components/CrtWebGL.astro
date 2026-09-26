@@ -37,6 +37,7 @@
         if (!(copy instanceof HTMLElement)) return;
         copy.classList.add(`crt-webgl__screen-content--${suffix}`);
         copy.setAttribute("aria-hidden", "true");
+        copy.querySelectorAll("[id]").forEach((element) => element.removeAttribute("id"));
         copy.querySelectorAll("a, button").forEach((element) => {
           element.setAttribute("tabindex", "-1");
         });
@@ -62,20 +63,22 @@
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 100);
     camera.position.set(0, 1.45, 20.5);
-    camera.lookAt(0, 1.15, 0);
+    // aimed at the Monitor's visual centre so it sits centred in the canvas
+    camera.lookAt(0, 1.95, 0);
 
     const renderer = new THREE.WebGLRenderer({
       canvas,
       alpha: true,
       antialias: true,
-      powerPreference: "high-performance",
+      // decorative scene — don't force laptops onto the discrete GPU
+      powerPreference: "default",
     });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.28;
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.type = THREE.PCFShadowMap;
 
     const monitor = new THREE.Group();
     monitor.position.y = 0.35;
@@ -155,6 +158,7 @@
       rearMaterial.color.setHex(0xfff8e0);
     }
 
+    const roundedBoxGeometries = new Map();
     function roundedBox(
       width,
       height,
@@ -164,10 +168,13 @@
       position,
       segments = shellSegments
     ) {
-      const mesh = new THREE.Mesh(
-        new RoundedBoxGeometry(width, height, depth, segments, radius),
-        material
-      );
+      const key = `${width}|${height}|${depth}|${segments}|${radius}`;
+      let geometry = roundedBoxGeometries.get(key);
+      if (!geometry) {
+        geometry = new RoundedBoxGeometry(width, height, depth, segments, radius);
+        roundedBoxGeometries.set(key, geometry);
+      }
+      const mesh = new THREE.Mesh(geometry, material);
       mesh.position.set(position[0], position[1], position[2]);
       mesh.castShadow = true;
       mesh.receiveShadow = true;
@@ -353,63 +360,59 @@
       color: 0x1a1e1c,
       roughness: 0.95,
     });
+    // Side perforated vents — every dot on both sides drawn as two instanced
+    // meshes (holes + plugs) instead of ~110 individual draw calls
+    const ventBackingGeometry = new THREE.CylinderGeometry(1.55, 1.65, 0.04, 24, 1, true, -0.9, 1.8);
+    const ventBackingMat = new THREE.MeshStandardMaterial({
+      color: 0xe2ddd2,
+      roughness: 0.88,
+      side: THREE.DoubleSide,
+    });
+    const ventDots = { hole: [], plug: [] };
+    const dotEuler = new THREE.Euler();
+    const dotMatrix = new THREE.Matrix4();
+    const dotPosition = new THREE.Vector3();
+    const dotRotation = new THREE.Quaternion();
+    const dotScale = new THREE.Vector3(1, 1, 1);
     function createSideVent(xSign) {
-      const ventGroup = new THREE.Group();
-      // Vent backing — slight recessed panel
-      const backing = new THREE.Mesh(
-        new THREE.CylinderGeometry(1.55, 1.65, 0.04, 24, 1, true, -0.9, 1.8),
-        new THREE.MeshStandardMaterial({
-          color: 0xe2ddd2,
-          roughness: 0.88,
-          side: THREE.DoubleSide,
-        })
-      );
+      const backing = new THREE.Mesh(ventBackingGeometry, ventBackingMat);
       backing.rotation.z = Math.PI / 2;
       backing.rotation.y = xSign > 0 ? 0 : Math.PI;
       backing.position.set(xSign * 4.22, 1.55, -0.15);
-      ventGroup.add(backing);
+      monitor.add(backing);
 
-      // Dot holes — ~70 dots in arc
+      // Dot holes — ~55 per side in an arc that tapers at top/bottom
       const rows = 9;
       const cols = 9;
+      dotEuler.set(0, xSign > 0 ? 0 : Math.PI, Math.PI / 2, "XYZ");
+      dotRotation.setFromEuler(dotEuler);
       for (let r = 0; r < rows; r++) {
         const y = 0.55 + r * 0.22;
-        // Arc width tapers at top/bottom
         const t = Math.abs(r - 4) / 4;
         const rowCols = Math.round(7 - t * 3);
         const rowOffset = (cols - rowCols) * 0.11 * 0.5;
         for (let c = 0; c < rowCols; c++) {
           const x = -0.65 + c * 0.18 + rowOffset;
           const z = -0.85 + Math.sin((c / rowCols) * Math.PI) * 0.25;
-          const isHole = Math.random() > 0.12; // mostly holes
-          const dot = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.035, 0.035, 0.025, 6),
-            isHole ? dotHoleMat : dotMat
-          );
-          dot.rotation.z = Math.PI / 2;
-          dot.rotation.y = xSign > 0 ? 0 : Math.PI;
           // Slight curvature along side
-          dot.position.set(xSign * (4.24 + Math.abs(z) * 0.08), y, z - 0.15);
-          ventGroup.add(dot);
+          dotPosition.set(xSign * (4.24 + Math.abs(z) * 0.08), y, z - 0.15);
+          dotMatrix.compose(dotPosition, dotRotation, dotScale);
+          (Math.random() > 0.12 ? ventDots.hole : ventDots.plug).push(dotMatrix.clone());
         }
       }
-      monitor.add(ventGroup);
     }
-    if (!isCompact) {
-      createSideVent(1);
-      createSideVent(-1);
-    } else {
-      // Simplified mobile: fewer dots
-      const simpleDot = new THREE.Mesh(
-        new THREE.BoxGeometry(0.04, 1.6, 1.2),
-        dotHoleMat
-      );
-      simpleDot.position.set(4.32, 1.55, -0.15);
-      monitor.add(simpleDot);
-      const simpleDotR = simpleDot.clone();
-      simpleDotR.position.set(-4.32, 1.55, -0.15);
-      monitor.add(simpleDotR);
-    }
+    createSideVent(1);
+    createSideVent(-1);
+    const dotGeometry = new THREE.CylinderGeometry(0.035, 0.035, 0.025, 6);
+    [
+      [ventDots.hole, dotHoleMat],
+      [ventDots.plug, dotMat],
+    ].forEach(([matrices, material]) => {
+      const dots = new THREE.InstancedMesh(dotGeometry, material, matrices.length);
+      matrices.forEach((matrix, index) => dots.setMatrixAt(index, matrix));
+      dots.instanceMatrix.needsUpdate = true;
+      monitor.add(dots);
+    });
 
     // Rear service panel, vents, fan and port details
     roundedBox(8, 5.45, 0.3, 0.06, rearMaterial, [0, 2.2, -2.28], bevelSegments);
@@ -455,17 +458,21 @@
     });
     roundedBox(1.02, 0.58, 0.1, 0.02, portMaterial, [2.48, 0.05, -2.45], 1);
     roundedBox(0.88, 0.44, 0.12, 0.01, portMetal, [2.48, 0.05, -2.46], 1);
+    // VGA pins — one instanced draw for all 15
+    const pins = new THREE.InstancedMesh(
+      new THREE.CylinderGeometry(0.022, 0.022, 0.06, 8),
+      new THREE.MeshStandardMaterial({ color: 0xc9a86a, metalness: 0.7, roughness: 0.4 }),
+      15
+    );
+    const pinRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2);
     for (let c = 0; c < 3; c += 1) {
       for (let r = 0; r < 5; r += 1) {
-        const pin = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.022, 0.022, 0.06, 8),
-          new THREE.MeshStandardMaterial({ color: 0xc9a86a, metalness: 0.7, roughness: 0.4 })
-        );
-        pin.rotation.x = Math.PI / 2;
-        pin.position.set(2.26 + r * 0.11, -0.08 + c * 0.11, -2.47);
-        monitor.add(pin);
+        dotPosition.set(2.26 + r * 0.11, -0.08 + c * 0.11, -2.47);
+        pins.setMatrixAt(c * 5 + r, dotMatrix.compose(dotPosition, pinRotation, dotScale));
       }
     }
+    pins.instanceMatrix.needsUpdate = true;
+    monitor.add(pins);
     roundedBox(0.68, 0.68, 0.1, 0.03, portMaterial, [-2.18, 0.18, -2.45], 1);
     const powerSocketInner = new THREE.Mesh(
       new THREE.CylinderGeometry(0.2, 0.2, 0.06, 16),
@@ -491,8 +498,9 @@
 
     // Foot pads on base disc
     const padMat = new THREE.MeshStandardMaterial({ color: 0x1a1e1e, roughness: 0.95 });
+    const padGeometry = new THREE.CylinderGeometry(0.18, 0.18, 0.06, 10);
     [[-1.4, -2.02, 1.1], [1.4, -2.02, 1.1], [-1.4, -2.02, -0.85], [1.4, -2.02, -0.85]].forEach(([x,y,z])=>{
-      const pad = new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.18,0.06,10), padMat);
+      const pad = new THREE.Mesh(padGeometry, padMat);
       pad.position.set(x,y,z);
       monitor.add(pad);
     });
@@ -636,7 +644,7 @@
       ctx.strokeStyle="rgba(255,255,255,0.9)"; ctx.lineWidth=4; ctx.strokeRect(18,18,s-36,s-36);
     });
 
-    if (!isCompact && cssTex && tsTex && jsTex && netTex && synTex) {
+    if (cssTex && tsTex && jsTex && netTex && synTex) {
       // Top of monitor — wide INTERNET banner high-def unlit so red stays vivid
       stickerPlane(netTex, 3.6, 0.775, [0, 5.32, 0.25], [-Math.PI/2, 0, 0], 1, { unlit: true });
       // Right side — CSS + JS cluster
@@ -647,10 +655,20 @@
       stickerPlane(synTex, 0.52, 0.52, [-4.36, 1.98, -0.55], [0, -Math.PI/2, -0.11], 0.85);
     }
 
-    const floor = new THREE.Mesh(
-      new THREE.PlaneGeometry(14, 10),
-      new THREE.ShadowMaterial({ color: 0x111711, opacity: 0.2 })
-    );
+    // Floor shadow fades out with distance from the foot, so the long key-light
+    // shadow dissolves softly instead of ending in a hard edge at the canvas border
+    const floorMaterial = new THREE.ShadowMaterial({ color: 0x111711, opacity: 0.2 });
+    floorMaterial.onBeforeCompile = (shader) => {
+      shader.vertexShader = shader.vertexShader
+        .replace("void main() {", "varying vec2 vFloor;\nvoid main() {\n\tvFloor = position.xy;");
+      shader.fragmentShader = shader.fragmentShader
+        .replace("void main() {", "varying vec2 vFloor;\nvoid main() {")
+        .replace(
+          "#include <tonemapping_fragment>",
+          "gl_FragColor.a *= 1.0 - smoothstep(3.2, 7.0, length(vFloor - vec2(0.0, -0.15)));\n\t#include <tonemapping_fragment>"
+        );
+    };
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(18, 18), floorMaterial);
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = -2.08;
     floor.receiveShadow = true;
@@ -660,11 +678,16 @@
     const key = new THREE.DirectionalLight(0xfff6e8, 3.6);
     key.position.set(-6, 10, 9);
     key.castShadow = true;
-    key.shadow.mapSize.set(isCompact ? 1024 : 2048, isCompact ? 1024 : 2048);
-    key.shadow.camera.left = -8;
-    key.shadow.camera.right = 8;
-    key.shadow.camera.top = 9;
-    key.shadow.camera.bottom = -6;
+    key.shadow.mapSize.set(1024, 1024);
+    // frustum covers the Monitor at any orbit plus the full reach of its cast
+    // shadow across the floor, so the shadow is never clipped to a hard edge
+    key.shadow.camera.left = -9;
+    key.shadow.camera.right = 9;
+    key.shadow.camera.top = 11;
+    key.shadow.camera.bottom = -9;
+    key.shadow.camera.near = 4;
+    key.shadow.camera.far = 32;
+    key.shadow.radius = 3;
     key.shadow.normalBias = 0.025;
     key.shadow.bias = -0.0005;
     scene.add(key);
@@ -695,6 +718,12 @@
     let pointerY = 0;
     let lastTime = performance.now();
     let frame = 0;
+    let running = false;
+    // Render on demand — the scene is only redrawn (and the Screen reprojected)
+    // when the orbit, press animation, power state or canvas size changed
+    let needsRender = true;
+    const rendered = { yaw: NaN, pitch: NaN, press: NaN, at: -Infinity };
+    const signalSvg = artifactLayer?.querySelector("svg");
 
     // Power state — square button toggles the monitor on/off
     let powerOn = true;
@@ -707,13 +736,15 @@
       screenLight.intensity = powerOn ? 1.6 : 0;
       glass.emissiveIntensity = powerOn ? 0.22 : 0.03;
       glass.color.setHex(powerOn ? 0x0e1411 : 0x0a0d0b);
+      screenLayer.style.pointerEvents = powerOn ? "auto" : "none";
+      needsRender = true;
+      syncSignalMotion();
     }
     function togglePower() {
       powerOn = !powerOn;
       btnPressAt = performance.now();
       applyPower();
     }
-    applyPower();
 
     const screenWorldSize = { width: 5.92, height: 3.54 };
     const screenSize = { width: 960, height: 576 };
@@ -723,6 +754,19 @@
       new THREE.Vector3(screenWorldSize.width / 2, -screenWorldSize.height / 2, 0.09),
       new THREE.Vector3(-screenWorldSize.width / 2, -screenWorldSize.height / 2, 0.09),
     ];
+    const screenSource = [
+      { x: 0, y: 0 },
+      { x: screenSize.width, y: 0 },
+      { x: screenSize.width, y: screenSize.height },
+      { x: 0, y: screenSize.height },
+    ];
+    const screenLayers = [screenLayer, artifactLayer].filter(
+      (layer) => layer instanceof HTMLElement
+    );
+    screenLayers.forEach((layer) => {
+      layer.style.width = `${screenSize.width}px`;
+      layer.style.height = `${screenSize.height}px`;
+    });
 
     function homography(source, target) {
       const matrix = [];
@@ -753,61 +797,100 @@
       return matrix.map((row) => row[8]).concat(1);
     }
 
+    // Scratch objects — projectScreen runs every rendered frame, keep it allocation-light
+    const screenWorld = new THREE.Vector3();
+    const screenNormal = new THREE.Vector3();
+    const toCamera = new THREE.Vector3();
+    const cornerPoint = new THREE.Vector3();
+    const projected = screenCorners.map(() => ({ x: 0, y: 0 }));
+    let viewport = { width: 0, height: 0 };
+    let lastTransform = "";
+    let lastOpacity = "";
+    function setScreenStyle(transform, opacity) {
+      if (transform !== lastTransform) {
+        lastTransform = transform;
+        screenLayers.forEach((layer) => (layer.style.transform = transform));
+      }
+      if (opacity !== lastOpacity) {
+        lastOpacity = opacity;
+        screenLayers.forEach((layer) => (layer.style.opacity = opacity));
+      }
+    }
+
     function projectScreen() {
-      const width = root.clientWidth;
-      const height = root.clientHeight;
-      monitor.updateMatrixWorld(true);
-      const screenWorld = screenMesh.getWorldPosition(new THREE.Vector3());
-      const normal = new THREE.Vector3(0, 0, 1).transformDirection(screenMesh.matrixWorld);
-      const toCamera = camera.position.clone().sub(screenWorld).normalize();
-      const facing = normal.dot(toCamera);
+      const { width, height } = viewport;
+      screenMesh.getWorldPosition(screenWorld);
+      screenNormal.set(0, 0, 1).transformDirection(screenMesh.matrixWorld);
+      const facing = screenNormal.dot(toCamera.copy(camera.position).sub(screenWorld).normalize());
       if (facing < 0.06 || width === 0 || height === 0) {
-        screenLayer.style.opacity = "0";
-        if (artifactLayer instanceof HTMLElement) artifactLayer.style.opacity = "0";
+        setScreenStyle(lastTransform, "0");
         return;
       }
-      const projected = screenCorners.map((corner) => {
-        const point = corner.clone();
-        screenMesh.localToWorld(point);
-        point.project(camera);
-        return { x: (point.x * 0.5 + 0.5) * width, y: (-point.y * 0.5 + 0.5) * height };
+      screenCorners.forEach((corner, index) => {
+        cornerPoint.copy(corner);
+        screenMesh.localToWorld(cornerPoint);
+        cornerPoint.project(camera);
+        projected[index].x = (cornerPoint.x * 0.5 + 0.5) * width;
+        projected[index].y = (-cornerPoint.y * 0.5 + 0.5) * height;
       });
-      const source = [
-        { x: 0, y: 0 },
-        { x: screenSize.width, y: 0 },
-        { x: screenSize.width, y: screenSize.height },
-        { x: 0, y: screenSize.height },
-      ];
-      const h = homography(source, projected);
+      const h = homography(screenSource, projected);
       const matrix = [h[0], h[3], 0, h[6], h[1], h[4], 0, h[7], 0, 0, 1, 0, h[2], h[5], 0, 1];
-      const transform = `matrix3d(${matrix.join(",")})`;
       const visibility = powerOn ? Math.min(1, facing * 2.2) : 0;
-      [screenLayer, artifactLayer].forEach((layer) => {
-        if (!(layer instanceof HTMLElement)) return;
-        layer.style.width = `${screenSize.width}px`;
-        layer.style.height = `${screenSize.height}px`;
-        layer.style.transform = transform;
-        layer.style.opacity = String(visibility);
-      });
-      screenLayer.style.pointerEvents = powerOn ? "auto" : "none";
+      setScreenStyle(
+        `matrix3d(${matrix.map((value) => value.toFixed(6)).join(",")})`,
+        visibility.toFixed(3)
+      );
     }
 
     function resize() {
       const width = root.clientWidth;
       const height = root.clientHeight;
       if (!width || !height) return;
+      viewport = { width, height };
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height, false);
+      needsRender = true;
+      if (!running) renderFrame(performance.now());
+    }
+
+    function renderFrame(time) {
+      const press = Math.max(0, 1 - (time - btnPressAt) / 180);
+      const moved =
+        Math.abs(orbit.yaw - rendered.yaw) > 1e-5 ||
+        Math.abs(orbit.pitch - rendered.pitch) > 1e-5 ||
+        press !== rendered.press;
+      if (!needsRender && !moved) return;
+      // Idle Drift is a sub-pixel crawl — 30fps is indistinguishable from 60 and
+      // halves the GPU cost while the page just sits there
+      const drifting =
+        !dragging &&
+        press === 0 &&
+        Math.abs(orbit.targetYaw - orbit.yaw) < 0.002 &&
+        Math.abs(orbit.targetPitch - orbit.pitch) < 0.002;
+      if (!needsRender && drifting && time - rendered.at < 30) return;
+      needsRender = false;
+      rendered.at = time;
+      rendered.yaw = orbit.yaw;
+      rendered.pitch = orbit.pitch;
+      rendered.press = press;
+      monitor.rotation.set(orbit.pitch, orbit.yaw, 0);
+      // power button press — nudge in, spring back
+      powerBtn.position.z = 2.53 - press * 0.035;
+      icon.position.z = 2.565 - press * 0.035;
+      monitor.updateMatrixWorld(true);
+      renderer.render(scene, camera);
       projectScreen();
     }
 
     function animate(time) {
-      const delta = Math.min((time - lastTime) / 1000, 0.05);
+      // scale per-frame nudges to a 60fps baseline so 120Hz screens don't drift twice as fast
+      // rAF timestamps can trail performance.now() — never integrate a negative step
+      const delta = THREE.MathUtils.clamp((time - lastTime) / 1000, 0, 0.05);
       lastTime = time;
       if (!reducedMotion.matches && !dragging && time > idleResumeAt) {
         // Idle drifts around current yaw, not snapped to fixed -0.24
-        orbit.targetYaw += Math.sin(time * 0.00035) * 0.0012;
+        orbit.targetYaw += Math.sin(time * 0.00035) * 0.0012 * delta * 60;
         orbit.targetPitch = THREE.MathUtils.clamp(
           idle.pitch + Math.sin(time * 0.00031 + 1.2) * 0.018,
           pitchBounds.min,
@@ -817,18 +900,35 @@
       orbit.yaw = THREE.MathUtils.damp(orbit.yaw, orbit.targetYaw, 4.2, delta);
       orbit.pitch = THREE.MathUtils.damp(orbit.pitch, orbit.targetPitch, 4.2, delta);
       // Wrap yaw to keep numbers stable but allow 360
-      if (orbit.yaw > Math.PI) { orbit.yaw -= Math.PI * 2; orbit.targetYaw -= Math.PI * 2; }
-      if (orbit.yaw < -Math.PI) { orbit.yaw += Math.PI * 2; orbit.targetYaw += Math.PI * 2; }
-      monitor.rotation.set(orbit.pitch, orbit.yaw, 0);
-      // power button press — nudge in, spring back
-      const press = Math.max(0, 1 - (time - btnPressAt) / 180);
-      powerBtn.position.z = 2.53 - press * 0.035;
-      icon.position.z = 2.565 - press * 0.035;
-      camera.position.set(0, 1.45, 20.5);
-      camera.lookAt(0, 1.15, 0);
-      renderer.render(scene, camera);
-      projectScreen();
+      if (orbit.yaw > Math.PI) { orbit.yaw -= Math.PI * 2; orbit.targetYaw -= Math.PI * 2; rendered.yaw -= Math.PI * 2; }
+      if (orbit.yaw < -Math.PI) { orbit.yaw += Math.PI * 2; orbit.targetYaw += Math.PI * 2; rendered.yaw += Math.PI * 2; }
+      renderFrame(time);
       frame = requestAnimationFrame(animate);
+    }
+
+    // CSS tears and SMIL turbulence keep repainting the Screen — freeze them
+    // whenever nobody can see them (scrolled away, tab hidden, powered off)
+    let onScreen = true;
+    function syncSignalMotion() {
+      const active = running && powerOn;
+      root.classList.toggle("is-paused", !active);
+      if (signalSvg instanceof SVGSVGElement) {
+        if (active) signalSvg.unpauseAnimations();
+        else signalSvg.pauseAnimations();
+      }
+    }
+    function setRunning(next) {
+      if (next === running) return;
+      running = next;
+      cancelAnimationFrame(frame);
+      if (running) {
+        lastTime = performance.now();
+        frame = requestAnimationFrame(animate);
+      }
+      syncSignalMotion();
+    }
+    function updateRunning() {
+      setRunning(onScreen && document.visibilityState === "visible");
     }
 
     const raycaster = new THREE.Raycaster();
@@ -844,7 +944,6 @@
     }
     function hitPowerButton() {
       raycaster.setFromCamera(pointerNdc, camera);
-      monitor.updateMatrixWorld(true);
       return raycaster.intersectObject(powerBtn, false).length > 0;
     }
     function onPointerDown(event) {
@@ -858,7 +957,8 @@
     }
     function onPointerMove(event) {
       if (!dragging) {
-        // pointer cursor while hovering the power button
+        // pointer cursor while hovering the power button (mouse only)
+        if (event.pointerType !== "mouse") return;
         setPointerFromEvent(event);
         root.style.cursor = hitPowerButton() ? "pointer" : "";
         return;
@@ -874,6 +974,7 @@
       pointerY = event.clientY;
     }
     function onPointerUp(event) {
+      if (!dragging) return;
       dragging = false;
       idleResumeAt = performance.now() + 4500;
       // a click (not a drag) on the square button toggles the power
@@ -881,21 +982,47 @@
       setPointerFromEvent(event);
       if (hitPowerButton()) togglePower();
     }
+    function onPointerCancel() {
+      // touch handed over to page scroll (touch-action: pan-y) — just release
+      dragging = false;
+      idleResumeAt = performance.now() + 4500;
+    }
 
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(root);
+    const visibilityObserver = new IntersectionObserver(
+      ([entry]) => {
+        onScreen = entry.isIntersecting;
+        updateRunning();
+      },
+      { rootMargin: "100px" }
+    );
+    visibilityObserver.observe(root);
+    document.addEventListener("visibilitychange", updateRunning);
     root.addEventListener("pointerdown", onPointerDown);
     root.addEventListener("pointermove", onPointerMove);
     root.addEventListener("pointerup", onPointerUp);
-    root.addEventListener("pointercancel", onPointerUp);
+    root.addEventListener("pointercancel", onPointerCancel);
 
-    reducedMotion.addEventListener?.("change", resize);
+    applyPower();
     resize();
-    frame = requestAnimationFrame(animate);
+    updateRunning();
 
     root.addEventListener("astro:unmount", () => {
-      cancelAnimationFrame(frame);
+      setRunning(false);
       resizeObserver.disconnect();
+      visibilityObserver.disconnect();
+      document.removeEventListener("visibilitychange", updateRunning);
+      const textures = new Set();
+      scene.traverse((object) => {
+        if (!(object instanceof THREE.Mesh)) return;
+        object.geometry.dispose();
+        (Array.isArray(object.material) ? object.material : [object.material]).forEach((material) => {
+          if (material.map) textures.add(material.map);
+          material.dispose();
+        });
+      });
+      textures.forEach((texture) => texture.dispose());
       renderer.dispose();
     }, { once: true });
   });
@@ -910,13 +1037,16 @@
     aspect-ratio: 1.2;
     contain: layout;
     overflow: visible;
-    touch-action: none;
+    /* vertical swipes still scroll the page on touch; horizontal drags orbit */
+    touch-action: pan-y;
     pointer-events: auto;
     cursor: grab;
     isolation: isolate;
     transform-origin: 50% 50%;
   }
   .crt-webgl:active { cursor: grabbing; }
+  @media (hover: hover) and (pointer: fine) { .crt-webgl { touch-action: none; } }
+  .crt-webgl.is-paused :global(*) { animation-play-state: paused !important; }
   .crt-webgl__canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
   .crt-webgl__screen, .crt-webgl__artifacts {
     position: absolute; top: 0; left: 0; transform-origin: 0 0; will-change: transform, opacity;
@@ -955,7 +1085,7 @@
   .crt-webgl__artifacts > :global(*) { display: block; width: 100%; height: 100%; }
   @media (max-width: 520px) { .crt-webgl { width: 100%; aspect-ratio: 1.06; } }
   @media (prefers-reduced-motion: reduce) {
-    .crt-webgl { touch-action: auto; transition: none; }
+    .crt-webgl { transition: none; }
     .crt-webgl__screen-content--distortion { animation: none; }
   }
 </style>
