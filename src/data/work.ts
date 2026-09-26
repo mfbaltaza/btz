@@ -1,6 +1,7 @@
 /*
  * Selected Work entries — case studies + hobby projects shown in
- * WorkSection.astro on /. Company names are placeholders for now.
+ * WorkSection.astro on /. Client entries mirror the CV — keep them factual;
+ * no invented companies, stacks or numbers.
  */
 
 export type WorkKind = "client" | "hobby";
@@ -23,59 +24,60 @@ export interface WorkEntry {
 
 export const workEntries: WorkEntry[] = [
   {
-    id: "northgate",
+    id: "pagoswow",
     kind: "client",
-    name: "Northgate Bank",
-    role: "Frontend Lead",
-    years: "2023—2025",
-    stack: ["React", "TypeScript", "Design System"],
+    name: "PagosWOW",
+    role: "Software Engineer",
+    years: "2025",
+    stack: [],
     blurb:
-      "Rebuilt the retail banking experience end to end: a new design system, a rewritten onboarding flow and a payments surface that stopped leaking customers.",
-    outcomes: [
-      { value: "+34%", label: "Onboarding conversion" },
-      { value: "-61%", label: "Time to interactive" },
-      { value: "4/mo", label: "Release cadence" },
-    ],
+      "Led web development on user experience across payment rails, onboarding and product testing, owning the whole product pipeline. Doubled weekly releases on web and mobile by streamlining standards and putting AI codegen to proper use.",
+    outcomes: [{ value: "2×", label: "Weekly releases, web & mobile" }],
   },
   {
-    id: "meridian",
+    id: "cargofive",
     kind: "client",
-    name: "Meridian Logistics",
-    role: "Full-stack Engineer",
-    years: "2021—2023",
-    stack: ["Next.js", "Node", "Postgres"],
+    name: "Cargofive",
+    role: "Software Engineer",
+    years: "2024—2025",
+    stack: [],
     blurb:
-      "Built the dispatch console a 400-truck fleet runs its day on: live map, route edits under load, and alerts drivers actually read.",
-    outcomes: [
-      { value: "-45%", label: "Dispatch handling time" },
-      { value: "120k", label: "Daily events processed" },
-      { value: "99.9%", label: "Console uptime" },
-    ],
+      "Streamlined contract management with a system for uploading, processing and displaying provider contracts, plus a dedicated section for operations staff to monitor contract issues.",
   },
   {
-    id: "helios",
+    id: "splice-digital",
     kind: "client",
-    name: "Helios Health",
-    role: "Product Engineer",
-    years: "2020—2021",
-    stack: ["Vue", "Rails", "a11y"],
+    name: "Splice Digital",
+    role: "Software Engineer",
+    years: "2023—2024",
+    stack: ["Next.js", "Sanity", "WordPress"],
     blurb:
-      "Took a patient portal from compliance checkbox to something people use without calling support. Accessibility was the product feature, not the audit.",
-    outcomes: [
-      { value: "31→67", label: "NPS" },
-      { value: "AA", label: "WCAG conformance" },
-      { value: "-52%", label: "Support tickets" },
-    ],
+      "Built fast, responsive headless CMS sites with Next.js on Sanity and WordPress, and rescued unmaintained client projects with fixes and a plan to improve them.",
   },
   {
-    id: "rom-kitchen",
-    kind: "hobby",
-    name: "ROM Kitchen",
-    role: "Maintainer",
-    years: "2016—2019",
-    stack: ["Android", "Shell", "Kernel"],
+    id: "keybe",
+    kind: "client",
+    name: "Keybe",
+    role: "Software Engineer",
+    years: "2021—2022",
+    stack: [],
     blurb:
-      "Custom Android ROMs for a handful of devices and a small XDA following. My first lesson in shipping to users who are not me.",
+      "Built KB Metrics, an analytics dashboard that improved company insight by at least 20%, and a self-managed chatbot that grew adoption of the automation product and the revenue behind it.",
+    outcomes: [{ value: "+20%", label: "Company insight" }],
+  },
+  {
+    id: "veinte",
+    kind: "client",
+    name: "Veinte",
+    role: "Software Engineer",
+    years: "2021",
+    stack: ["React"],
+    blurb:
+      "Built a self-serve profile section (personal data, KYC level, account changes) that cut support tickets by 40%, and a Services section that raised account-balance usage by more than 30%.",
+    outcomes: [
+      { value: "-40%", label: "Support tickets" },
+      { value: "+30%", label: "Account-balance usage" },
+    ],
   },
   {
     id: "crt-site",
@@ -83,18 +85,8 @@ export const workEntries: WorkEntry[] = [
     name: "The CRT Site",
     role: "Everything",
     years: "2025",
-    stack: ["Three.js", "Astro", "GSAP"],
+    stack: ["Three.js", "Astro"],
     blurb:
       "This very site: an editorial page framing a 3D-rendered CRT that hosts a period-faithful 2005 website through a homography-projected screen.",
-  },
-  {
-    id: "pocket-tally",
-    kind: "hobby",
-    name: "Pocket Tally",
-    role: "Everything",
-    years: "2024",
-    stack: ["Preact", "PWA", "IndexedDB"],
-    blurb:
-      "A tiny offline-first budgeting PWA. One input, one number, zero accounts. Built because every other app asked for my bank login.",
   },
 ];
