@@ -1,7 +1,8 @@
 ---
 // Selected Work — editorial index of case studies and hobby projects.
-// Rows invert on hover; descriptions stay collapsed until hover/focus
-// (always visible on touch devices that can't hover).
+// Items invert on hover — title row and description as one block; the
+// description stays collapsed until hover/focus (always visible on touch
+// devices that can't hover).
 import { workEntries } from "../data/work";
 
 const client = workEntries.filter((e) => e.kind === "client");
@@ -11,20 +12,18 @@ const hobby = workEntries.filter((e) => e.kind === "hobby");
 <section class="work" aria-labelledby="work-title">
   <div class="work-head">
     <p class="work-kicker">03 / Selected Work</p>
-    <h2 id="work-title">Work that<br /><em>shipped.</em></h2>
-    <p class="work-dek">
-      Case studies from teams I've worked with, and the things I build because I
-      can't not.
-    </p>
+    <h2 id="work-title">Do you even<br /><em>ship?</em></h2>
+    <p class="work-dek">Teams I've worked with, and the things I build.</p>
   </div>
 
   {
     [
-      { label: "Client Work — Case Studies", items: client },
-      { label: "Hobby Projects", items: hobby },
+      { label: "Work", items: client },
+      { label: "Tinkering with", items: hobby },
     ].map((group) => (
       <div class="work-group">
         <h3 class="work-group-label">{group.label}</h3>
+        <div class="work-band" aria-hidden="true" />
         <ol class="work-list">
           {group.items.map((entry, i) => (
             <li>
@@ -41,7 +40,11 @@ const hobby = workEntries.filter((e) => e.kind === "hobby");
                   ↗
                 </span>
               </a>
-              <p class="row-blurb">{entry.blurb}</p>
+              <div class="row-blurb">
+                <div class="row-blurb-clip">
+                  <p>{entry.blurb}</p>
+                </div>
+              </div>
             </li>
           ))}
         </ol>
@@ -87,6 +90,7 @@ const hobby = workEntries.filter((e) => e.kind === "hobby");
   .work-group {
     max-width: 1000px;
     margin: 0 auto;
+    position: relative;
   }
   .work-group + .work-group {
     margin-top: 9vh;
@@ -118,6 +122,7 @@ const hobby = workEntries.filter((e) => e.kind === "hobby");
     color: inherit;
     text-decoration: none;
     position: relative;
+    z-index: 2;
   }
   .row-num {
     font: 11px var(--mono);
@@ -140,61 +145,130 @@ const hobby = workEntries.filter((e) => e.kind === "hobby");
     color: var(--accent-ink);
     opacity: 0;
     transform: translate(-6px, 4px);
-    transition: opacity 160ms ease-out, transform 160ms ease-out;
   }
 
-  /* Description collapsed by default; expands on row hover or keyboard
-     focus. Always expanded on devices without hover (touch). Sits fully
-     below the row so the inverted row never covers it. */
+  /* Each item is one unit with a single engaged state: the whole item —
+     title row and description — inverts as one block, and the description
+     opens with it. Triggered by hovering anywhere on the item or by keyboard
+     focus. The description is a 0fr → 1fr grid track, so it animates its
+     real height and all of its spacing lives inside the item (no strip
+     between items where hover could drop). Always expanded on devices
+     without hover (touch). */
   .row-blurb {
-    max-height: 0;
-    overflow: hidden;
+    display: grid;
+    grid-template-rows: 0fr;
     opacity: 0;
+    position: relative;
+    z-index: 2;
+    transition: grid-template-rows var(--work-dur) var(--work-ease),
+      opacity var(--work-dur) var(--work-ease);
+  }
+  .row-blurb-clip {
+    min-height: 0;
+    overflow: hidden;
+  }
+  .row-blurb p {
     margin: 0 0 0 calc(3rem + 26px);
-    font: 14px/1.5 var(--serif);
+    padding: 0 0 26px;
+    font: 14px/21px var(--serif);
     color: var(--ink-soft);
     max-width: 560px;
-    transition: max-height 220ms cubic-bezier(0.23, 1, 0.32, 1),
-      opacity 160ms ease-out, margin-bottom 220ms cubic-bezier(0.23, 1, 0.32, 1);
   }
-  /* Air between the inverted row and its description; lives inside the
-     clipped box so it collapses to nothing. */
-  .row-blurb::before {
-    content: "";
-    display: block;
-    height: 16px;
-  }
-  .work-list li:hover .row-blurb,
-  .work-list li:focus-within .row-blurb {
-    max-height: 10em;
+  .work-group:not([data-band]) li:hover .row-blurb,
+  .work-group:not([data-band]) li:focus-within .row-blurb,
+  .work-group[data-band] li.is-engaged .row-blurb {
+    grid-template-rows: 1fr;
     opacity: 1;
-    margin-bottom: 22px;
   }
   @media (hover: none) {
     .row-blurb {
-      max-height: 10em;
+      grid-template-rows: 1fr;
       opacity: 1;
-      margin-bottom: 22px;
     }
   }
 
+  /* One curve and one duration for everything that moves here, so the
+     description opening, the previous one closing and the band landing all
+     arrive together. Strong ease-out: no overshoot, nothing to bounce. */
+  .work {
+    --work-ease: cubic-bezier(0.23, 1, 0.32, 1);
+    --work-dur: 220ms;
+  }
+  .work-row,
+  .row-num,
+  .row-role,
+  .row-years,
+  .row-blurb p {
+    transition: color var(--work-dur) var(--work-ease);
+  }
+  .row-arrow {
+    transition: opacity var(--work-dur) var(--work-ease),
+      transform var(--work-dur) var(--work-ease);
+  }
+
+  /* Fallback path (JS off): each item inverts itself on hover/focus. */
   @media (hover: hover) and (pointer: fine) {
-    .work-row {
-      transition: background-color 160ms ease-out, color 160ms ease-out;
+    .work-group:not([data-band]) .work-list li {
+      transition: background-color var(--work-dur) var(--work-ease);
     }
-    .work-row:hover {
+    .work-group:not([data-band]) .work-list li:hover,
+    .work-group:not([data-band]) .work-list li:focus-within {
       background: var(--ink);
+    }
+    .work-group:not([data-band]) .work-list li:hover .work-row,
+    .work-group:not([data-band]) .work-list li:focus-within .work-row,
+    .work-group:not([data-band]) .work-list li:hover .row-blurb p,
+    .work-group:not([data-band]) .work-list li:focus-within .row-blurb p {
       color: var(--paper);
     }
-    .work-row:hover .row-num,
-    .work-row:hover .row-role,
-    .work-row:hover .row-years {
+    .work-group:not([data-band]) .work-list li:hover .row-num,
+    .work-group:not([data-band]) .work-list li:hover .row-role,
+    .work-group:not([data-band]) .work-list li:hover .row-years,
+    .work-group:not([data-band]) .work-list li:focus-within .row-num,
+    .work-group:not([data-band]) .work-list li:focus-within .row-role,
+    .work-group:not([data-band]) .work-list li:focus-within .row-years {
       color: #b9b3aa;
     }
-    .work-row:hover .row-arrow {
+    .work-group:not([data-band]) .work-list li:hover .row-arrow,
+    .work-group:not([data-band]) .work-list li:focus-within .row-arrow {
       opacity: 1;
       transform: none;
     }
+  }
+
+  /* Banded path (JS on): one shared band paints the inversion and slides
+     between items, sitting above static content but below the item's text.
+     Its height is a real height, not a scaled 1px strip: at fractional zoom
+     or pixel ratios the strip gets snapped to a whole device pixel before
+     scaling and the band comes out visibly short. */
+  .work-band {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 0;
+    background: var(--ink);
+    opacity: 0;
+    z-index: 1;
+    pointer-events: none;
+    transition: transform var(--work-dur) var(--work-ease),
+      height var(--work-dur) var(--work-ease), opacity 160ms ease-out;
+  }
+  .work-band.is-on {
+    opacity: 1;
+  }
+  .work-group[data-band] li.is-engaged .work-row,
+  .work-group[data-band] li.is-engaged .row-blurb p {
+    color: var(--paper);
+  }
+  .work-group[data-band] li.is-engaged .row-num,
+  .work-group[data-band] li.is-engaged .row-role,
+  .work-group[data-band] li.is-engaged .row-years {
+    color: #b9b3aa;
+  }
+  .work-group[data-band] li.is-engaged .row-arrow {
+    opacity: 1;
+    transform: none;
   }
 
   @media (max-width: 700px) {
@@ -205,15 +279,125 @@ const hobby = workEntries.filter((e) => e.kind === "hobby");
     .row-years {
       display: none;
     }
-    .row-blurb {
+    .row-blurb p {
       margin-left: calc(2rem + 18px);
     }
   }
+  /* Reduced motion: keep the color and opacity changes, drop the movement. */
   @media (prefers-reduced-motion: reduce) {
-    .row-arrow,
-    .work-row,
     .row-blurb {
-      transition: none;
+      transition: opacity var(--work-dur) var(--work-ease);
+    }
+    .work-band {
+      transition: opacity 160ms ease-out;
+    }
+    .row-arrow {
+      transition: opacity var(--work-dur) var(--work-ease);
     }
   }
 </style>
+
+<script>
+  // Traveling inversion band: one shared black block per list that slides
+  // between engaged items. Its target is the item's resting box — where the
+  // item will sit once every other description has closed and its own has
+  // opened — so the band goes straight there on one CSS transition instead
+  // of chasing the layout while it shifts.
+  const FINE_HOVER = "(hover: hover) and (pointer: fine)";
+
+  function initWorkBands() {
+    if (!matchMedia(FINE_HOVER).matches) return;
+
+    document.querySelectorAll<HTMLElement>(".work-group").forEach((group) => {
+      const band = group.querySelector<HTMLElement>(".work-band");
+      const list = group.querySelector<HTMLElement>(".work-list");
+      if (!band || !list) return;
+      group.setAttribute("data-band", "");
+
+      const items = [...list.querySelectorAll<HTMLElement>(":scope > li")];
+      let engagedLi: HTMLElement | null = null;
+      let exitTimer = 0;
+
+      // Current (possibly mid-transition) and fully open description heights.
+      const blurbHeight = (li: HTMLElement) =>
+        li.querySelector(".row-blurb")?.getBoundingClientRect().height ?? 0;
+      const openHeight = (li: HTMLElement) =>
+        li.querySelector(".row-blurb-clip")?.scrollHeight ?? 0;
+
+      function restingBox(li: HTMLElement, open: boolean) {
+        const r = li.getBoundingClientRect();
+        let y = r.top - group.getBoundingClientRect().top;
+        for (const other of items) {
+          if (other === li) break;
+          y -= blurbHeight(other);
+        }
+        const h = r.height - blurbHeight(li) + (open ? openHeight(li) : 0);
+        return { y, h };
+      }
+
+      function place(box: { y: number; h: number }, animate: boolean) {
+        if (!animate) band!.style.transition = "none";
+        band!.style.transform = `translateY(${box.y}px)`;
+        band!.style.height = `${box.h}px`;
+        if (!animate) {
+          void band!.offsetHeight;
+          band!.style.transition = "";
+        }
+      }
+
+      function engage(li: HTMLElement) {
+        clearTimeout(exitTimer);
+        if (li === engagedLi) return;
+        // Coming from nothing: start on the title row and fade in while
+        // growing over the description, rather than flying in from wherever
+        // the band was last.
+        if (!engagedLi && Number(getComputedStyle(band!).opacity) < 0.05)
+          place(restingBox(li, false), false);
+        engagedLi?.classList.remove("is-engaged");
+        li.classList.add("is-engaged");
+        engagedLi = li;
+        band!.classList.add("is-on");
+        place(restingBox(li, true), true);
+      }
+
+      function scheduleExit() {
+        clearTimeout(exitTimer);
+        exitTimer = setTimeout(() => {
+          if (!engagedLi) return;
+          const li = engagedLi;
+          li.classList.remove("is-engaged");
+          engagedLi = null;
+          band!.classList.remove("is-on");
+          place(restingBox(li, false), true); // shrink back onto the title row
+        }, 180);
+      }
+
+      items.forEach((li) => {
+        li.addEventListener("pointerenter", () => engage(li));
+      });
+      list.addEventListener("pointerleave", scheduleExit);
+      list.addEventListener("focusin", (e) => {
+        if (!(e.target instanceof Element)) return;
+        const li = e.target.closest("li");
+        if (li && list.contains(li)) engage(li);
+      });
+      list.addEventListener("focusout", (e) => {
+        const focusEvent = e as FocusEvent;
+        if (
+          !focusEvent.relatedTarget ||
+          !(focusEvent.relatedTarget instanceof Node) ||
+          !list.contains(focusEvent.relatedTarget)
+        ) {
+          scheduleExit();
+        }
+      });
+
+      // Text reflows on resize; re-seat the band without animating.
+      addEventListener("resize", () => {
+        if (engagedLi) place(restingBox(engagedLi, true), false);
+      });
+    });
+  }
+
+  initWorkBands();
+</script>
