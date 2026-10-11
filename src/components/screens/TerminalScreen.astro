@@ -1,0 +1,68 @@
+---
+import { workEntries } from "../../data/work";
+const clients = workEntries.filter((w) => w.kind === "client");
+---
+
+<div class="term">
+  <p class="dim">BTZ-BIOS v2.05 &nbsp;·&nbsp; 640K OK &nbsp;·&nbsp; boot: juan.sys</p>
+  <p><span class="prompt">juan@btz:~$</span> whoami</p>
+  <p class="big">Juan Araujo</p>
+  <p>software engineer · frontend &amp; product · <span class="ok">● open to the right team</span></p>
+  <p><span class="prompt">juan@btz:~$</span> ls ./work</p>
+  <table>
+    {
+      clients.map((w) => (
+        <tr>
+          <td class="yr">{w.years}</td>
+          <td class="name">{w.name}</td>
+          <td class="dim">{w.outcomes?.[0] ? `${w.outcomes[0].value} ${w.outcomes[0].label.toLowerCase()}` : w.role.toLowerCase()}</td>
+        </tr>
+      ))
+    }
+  </table>
+  <p><span class="prompt">juan@btz:~$</span> contact --help</p>
+  <p class="menu">
+    <a href="#story">[1] read story</a>
+    <a href="https://linkedin.com/in/baltaza" target="_blank" rel="noopener">[2] linkedin</a>
+    <a href="mailto:hello@juan-araujo.com">[3] email</a>
+    <a href="https://drive.google.com/file/d/1_VD7rlEnLHo750ggmAMi31mfKWgwJpu1/view?usp=sharing" target="_blank" rel="noopener">[4] cv.pdf</a>
+  </p>
+  <p><span class="prompt">juan@btz:~$</span> <span class="cursor">█</span></p>
+</div>
+
+<style>
+  .term {
+    box-sizing: border-box;
+    padding: 34px 44px;
+    color: #9cff9c;
+    background: radial-gradient(ellipse at 50% 45%, #0f2a14 0%, #071409 70%, #030a04 100%);
+    font: 21px/1.5 "VT323", "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    text-shadow: 0 0 6px rgba(120, 255, 140, 0.55);
+    text-align: left;
+  }
+  p { margin: 0 0 6px; }
+  .dim { color: #4fae5c; }
+  .prompt { color: #e9ffb0; }
+  .big {
+    margin: 2px 0 2px;
+    font-size: 54px;
+    line-height: 1.05;
+    letter-spacing: 0.02em;
+    color: #c8ffc8;
+  }
+  .ok { color: #e9ffb0; }
+  table { border-spacing: 0; margin: 2px 0 12px 22px; }
+  td { padding: 1px 26px 1px 0; }
+  .yr { color: #4fae5c; }
+  .name { color: #c8ffc8; }
+  .menu a {
+    margin-right: 22px;
+    color: #9cff9c;
+    text-decoration: none;
+    border-bottom: 2px solid #2f7a3a;
+  }
+  .menu a:hover { background: #9cff9c; color: #071409; text-shadow: none; }
+  .cursor { animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .cursor { animation: none; } }
+</style>
