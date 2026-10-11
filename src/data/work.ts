@@ -39,7 +39,7 @@ export const workEntries: WorkEntry[] = [
     kind: "client",
     name: "Cargofive",
     role: "Software Engineer",
-    years: "2024—2025",
+    years: "2024–2025",
     stack: [],
     blurb:
       "Streamlined contract management with a system for uploading, processing and displaying provider contracts, plus a dedicated section for operations staff to monitor contract issues.",
@@ -49,7 +49,7 @@ export const workEntries: WorkEntry[] = [
     kind: "client",
     name: "Splice Digital",
     role: "Software Engineer",
-    years: "2023—2024",
+    years: "2023–2024",
     stack: ["Next.js", "Sanity", "WordPress"],
     blurb:
       "Built fast, responsive headless CMS sites with Next.js on Sanity and WordPress, and rescued unmaintained client projects with fixes and a plan to improve them.",
@@ -59,7 +59,7 @@ export const workEntries: WorkEntry[] = [
     kind: "client",
     name: "Keybe",
     role: "Software Engineer",
-    years: "2021—2022",
+    years: "2021–2022",
     stack: [],
     blurb:
       "Built KB Metrics, an analytics dashboard that improved company insight by at least 20%, and a self-managed chatbot that grew adoption of the automation product and the revenue behind it.",

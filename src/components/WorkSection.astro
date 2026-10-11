@@ -13,7 +13,7 @@ const hobby = workEntries.filter((e) => e.kind === "hobby");
   <div class="work-head">
     <p class="work-kicker">03 / Selected Work</p>
     <h2 id="work-title">Do you even<br /><em>ship?</em></h2>
-    <p class="work-dek">Teams I've worked with, and the things I build.</p>
+    <p class="work-dek">Teams I’ve worked with, and the things I build.</p>
   </div>
 
   {
@@ -227,7 +227,7 @@ const hobby = workEntries.filter((e) => e.kind === "hobby");
     .work-group:not([data-band]) .work-list li:focus-within .row-num,
     .work-group:not([data-band]) .work-list li:focus-within .row-role,
     .work-group:not([data-band]) .work-list li:focus-within .row-years {
-      color: #b9b3aa;
+      color: var(--ink-soft-inverse);
     }
     .work-group:not([data-band]) .work-list li:hover .row-arrow,
     .work-group:not([data-band]) .work-list li:focus-within .row-arrow {
@@ -264,7 +264,7 @@ const hobby = workEntries.filter((e) => e.kind === "hobby");
   .work-group[data-band] li.is-engaged .row-num,
   .work-group[data-band] li.is-engaged .row-role,
   .work-group[data-band] li.is-engaged .row-years {
-    color: #b9b3aa;
+    color: var(--ink-soft-inverse);
   }
   .work-group[data-band] li.is-engaged .row-arrow {
     opacity: 1;
