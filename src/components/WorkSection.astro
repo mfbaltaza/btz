@@ -31,19 +31,15 @@ const hobby = workEntries.filter((e) => e.kind === "hobby");
           <ol class="work-list">
             {group.items.map((entry, i) => (
               <li>
-                <a
-                  href="#"
-                  class="work-row"
-                  aria-label={`${entry.name} — ${entry.role}`}
-                >
+                {/* No case-study pages yet: rows stay focusable (so the
+                    keyboard can open the description) but aren't links,
+                    so they don't promise a destination or jump to the top. */}
+                <div class="work-row" tabindex="0">
                   <span class="row-num">{String(i + 1).padStart(2, "0")}</span>
                   <span class="row-title">{entry.name}</span>
                   <span class="row-role">{entry.role}</span>
                   <span class="row-years">{entry.years}</span>
-                  <span class="row-arrow" aria-hidden="true">
-                    ↗
-                  </span>
-                </a>
+                </div>
                 <div class="row-blurb">
                   <div class="row-blurb-clip">
                     <p>{entry.blurb}</p>
@@ -121,14 +117,14 @@ const hobby = workEntries.filter((e) => e.kind === "hobby");
   }
   .work-row {
     display: grid;
-    grid-template-columns: 3rem minmax(0, 1fr) auto auto 2rem;
+    grid-template-columns: 3rem minmax(0, 1fr) auto auto 2rem; /* last track: right gutter */
     gap: 18px;
     align-items: baseline;
     padding: 30px 8px 22px;
     color: inherit;
-    text-decoration: none;
     position: relative;
     z-index: 2;
+    outline-offset: -2px;
   }
   .row-num {
     font: 11px var(--mono);
@@ -145,12 +141,6 @@ const hobby = workEntries.filter((e) => e.kind === "hobby");
     text-transform: uppercase;
     color: var(--ink-soft);
     white-space: nowrap;
-  }
-  .row-arrow {
-    justify-self: end;
-    color: var(--accent-ink);
-    opacity: 0;
-    transform: translate(-6px, 4px);
   }
 
   /* Each item is one unit with a single engaged state: the whole item —
@@ -207,10 +197,6 @@ const hobby = workEntries.filter((e) => e.kind === "hobby");
   .row-blurb p {
     transition: color var(--work-dur) var(--work-ease);
   }
-  .row-arrow {
-    transition: opacity var(--work-dur) var(--work-ease),
-      transform var(--work-dur) var(--work-ease);
-  }
 
   /* Fallback path (JS off): each item inverts itself on hover/focus. */
   @media (hover: hover) and (pointer: fine) {
@@ -234,11 +220,6 @@ const hobby = workEntries.filter((e) => e.kind === "hobby");
     .work-group:not([data-band]) .work-list li:focus-within .row-role,
     .work-group:not([data-band]) .work-list li:focus-within .row-years {
       color: var(--ink-soft-inverse);
-    }
-    .work-group:not([data-band]) .work-list li:hover .row-arrow,
-    .work-group:not([data-band]) .work-list li:focus-within .row-arrow {
-      opacity: 1;
-      transform: none;
     }
   }
 
@@ -272,10 +253,6 @@ const hobby = workEntries.filter((e) => e.kind === "hobby");
   .work-group[data-band] li.is-engaged .row-years {
     color: var(--ink-soft-inverse);
   }
-  .work-group[data-band] li.is-engaged .row-arrow {
-    opacity: 1;
-    transform: none;
-  }
 
   @media (max-width: 700px) {
     .work-row {
@@ -296,9 +273,6 @@ const hobby = workEntries.filter((e) => e.kind === "hobby");
     }
     .work-band {
       transition: opacity 160ms ease-out;
-    }
-    .row-arrow {
-      transition: opacity var(--work-dur) var(--work-ease);
     }
   }
 </style>

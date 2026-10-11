@@ -194,7 +194,8 @@ import CrtMonitor from "./CrtMonitor.astro";
     animation: enter var(--enter-duration) var(--enter-easing) 100ms both;
   }
 
-  /* Scroll reveal — JS opts .story into .reveal only when it can animate it back. */
+  /* Scroll reveal — JS opts .story into .reveal only when it can animate it back
+     (an IntersectionObserver exists). Reduced motion keeps the fade only. */
   .story.reveal {
     opacity: 0;
     transform: translateY(10px);
@@ -206,15 +207,18 @@ import CrtMonitor from "./CrtMonitor.astro";
     transform: none;
   }
 
+  /* Press feedback for every pointer, touch included; only the hover color
+     is gated, since touch fires false hovers on tap. */
+  .editorial-actions a {
+    transition: color 160ms ease, border-color 160ms ease,
+      transform 160ms var(--enter-easing);
+  }
+  .editorial-actions a:active {
+    transform: scale(0.97);
+  }
   @media (hover: hover) and (pointer: fine) {
-    .editorial-actions a {
-      transition: color 160ms ease-out, border-color 160ms ease-out;
-    }
     .editorial-actions a:hover {
       color: var(--accent-ink);
-    }
-    .editorial-actions a:active {
-      transform: scale(0.97);
     }
   }
 
@@ -267,24 +271,26 @@ import CrtMonitor from "./CrtMonitor.astro";
 
   @media (prefers-reduced-motion: reduce) {
     .editorial-actions a {
-      transition: none;
+      transition: color 160ms ease, border-color 160ms ease;
+    }
+    .editorial-actions a:active {
+      transform: none;
     }
     .editorial-shell h1,
     .editorial-bottom {
       animation: none;
     }
+    /* Gentler, not gone: the story still fades in, without the lift. */
     .story.reveal {
-      opacity: 1;
       transform: none;
-      transition: none;
+      transition: opacity var(--enter-duration) ease;
     }
   }
 </style>
 
 <script>
   const story = document.querySelector(".story");
-  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (story && "IntersectionObserver" in window && !reduced) {
+  if (story && "IntersectionObserver" in window) {
     story.classList.add("reveal");
     const io = new IntersectionObserver(
       (entries) =>

@@ -104,15 +104,18 @@
     color: var(--accent-ink);
   }
 
+  /* Press feedback for every pointer, touch included; only the hover color
+     is gated, since touch fires false hovers on tap. */
+  .ghost-actions a {
+    transition: color 160ms ease, border-color 160ms ease,
+      transform 160ms var(--enter-easing);
+  }
+  .ghost-actions a:active {
+    transform: scale(0.97);
+  }
   @media (hover: hover) and (pointer: fine) {
-    .ghost-actions a {
-      transition: color 160ms ease-out, border-color 160ms ease-out;
-    }
     .ghost-actions a:hover {
       color: var(--accent-ink);
-    }
-    .ghost-actions a:active {
-      transform: scale(0.97);
     }
   }
 
@@ -144,6 +147,12 @@
     .ghost-bottom,
     .ghost-number {
       animation: none;
+    }
+    .ghost-actions a {
+      transition: color 160ms ease, border-color 160ms ease;
+    }
+    .ghost-actions a:active {
+      transform: none;
     }
   }
 </style>
