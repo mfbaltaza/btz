@@ -1,0 +1,384 @@
+---
+// SiteContent — the mid-2000s "Web 2.0" homepage shown through the Monitor's
+// Screen, inside Internet Explorer on Windows XP. Laid out on the Screen's
+// fixed 960×576 canvas, which renders at roughly half size on the Glass, so
+// type is sized to stay readable there. Results come from data/work.ts.
+import { workEntries } from "../data/work";
+
+const highlights = workEntries.filter((w) => w.outcomes?.length).slice(0, 3);
+const cvUrl =
+  "https://drive.google.com/file/d/1_VD7rlEnLHo750ggmAMi31mfKWgwJpu1/view?usp=sharing";
+---
+
+<div class="xp">
+  <div class="xp-title" aria-hidden="true">
+    <span class="xp-ie">e</span>
+    <span class="xp-title-text">Juan Araujo - Microsoft Internet Explorer</span>
+    <span class="xp-btns"><i>_</i><i>□</i><i class="xp-close">×</i></span>
+  </div>
+  <div class="xp-bar" aria-hidden="true">
+    <span>◀ Back</span><span class="xp-dim">▶</span>
+    <span class="xp-dim">Address</span>
+    <span class="xp-addr"><b>e</b> http://www.juanaraujo.com/</span>
+    <span class="xp-go">➜ Go</span>
+  </div>
+
+  <div class="w2">
+    <header class="w2-head">
+      <div class="w2-logo">juan<span>araujo</span><sup>beta</sup></div>
+      <nav aria-label="Monitor site">
+        <a class="is-on" href="#top" aria-current="page">Home</a><a href="#work"
+          >Work</a
+        ><a href="#story">About</a><a href="mailto:hello@juan-araujo.com"
+          >Contact</a
+        >
+      </nav>
+    </header>
+
+    <section class="w2-hero">
+      <div class="w2-copy">
+        <p class="w2-h">
+          I build web products<br />people <em>enjoy</em> using.
+        </p>
+        <p class="w2-dek">
+          Software engineer, frontend &amp; product. Payment flows, analytics
+          dashboards and fast CMS sites.
+        </p>
+        <div class="w2-ctas">
+          <a class="w2-btn" href="mailto:hello@juan-araujo.com">Hire Juan »</a>
+          <a class="w2-link" href={cvUrl} target="_blank" rel="noopener"
+            >Download CV (PDF)<span class="visually-hidden">
+              (opens in a new tab)</span
+            ></a
+          >
+        </div>
+      </div>
+      <div class="w2-portrait">
+        <img src="/juan.jpg" alt="Juan Araujo" width="320" height="320" />
+        <p class="w2-badge"><b>Open</b><span>to the right team</span></p>
+      </div>
+    </section>
+
+    <ul class="w2-cards" aria-label="Results">
+      {
+        highlights.map((w) => (
+          <li>
+            <a href="#work">
+              <b>{w.outcomes![0].value}</b>
+              <span class="w2-lbl">{w.outcomes![0].label}</span>
+              <span class="w2-co">
+                {w.name} · {w.years}
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+
+  <div class="xp-status" aria-hidden="true">
+    <span>Done</span><span class="xp-zone">Internet</span>
+  </div>
+</div>
+
+<style>
+  /* ---- Windows XP / Internet Explorer chrome ---- */
+  .xp {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    color: #000;
+    background: #ece9d8;
+    font: 15px/1.2 Tahoma, "Segoe UI", Verdana, sans-serif;
+    text-align: left;
+  }
+  .xp *,
+  .xp *::before,
+  .xp *::after {
+    box-sizing: border-box;
+  }
+  .xp-title {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 8px;
+    height: 34px;
+    padding: 0 6px 0 10px;
+    color: #fff;
+    background: linear-gradient(
+      #0a5fd8 0%,
+      #3d95ff 9%,
+      #0058e6 18%,
+      #0050d8 70%,
+      #0045b8 100%
+    );
+    font-size: 16px;
+    font-weight: bold;
+    text-shadow: 1px 1px #0a246a;
+  }
+  .xp-ie {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    color: #1d6fd8;
+    background: #fff;
+    font: bold 16px/1 Georgia, serif;
+    text-shadow: none;
+  }
+  .xp-title-text {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .xp-btns {
+    display: flex;
+    gap: 3px;
+  }
+  .xp-btns i {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border: 1px solid #fff;
+    border-radius: 4px;
+    background: linear-gradient(#5d9cfb, #2763dd);
+    font-size: 14px;
+    font-style: normal;
+  }
+  .xp-btns .xp-close {
+    background: linear-gradient(#e8835f, #c73b1a);
+  }
+  .xp-bar {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 12px;
+    height: 38px;
+    padding: 0 10px;
+    border-bottom: 1px solid #aca899;
+  }
+  .xp-dim {
+    color: #6d6d6d;
+  }
+  .xp-addr {
+    flex: 1;
+    overflow: hidden;
+    padding: 4px 8px;
+    border: 1px solid #7f9db9;
+    background: #fff;
+    white-space: nowrap;
+  }
+  .xp-addr b {
+    color: #1d6fd8;
+    font-family: Georgia, serif;
+  }
+  .xp-go {
+    color: #1e7d1e;
+  }
+  .xp-status {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: space-between;
+    height: 26px;
+    padding: 0 10px;
+    border-top: 1px solid #aca899;
+    color: #333;
+    font-size: 13px;
+  }
+  .xp-zone {
+    padding-left: 12px;
+    border-left: 1px solid #aca899;
+  }
+
+  /* ---- The page itself ---- */
+  .w2 {
+    flex: 1;
+    min-height: 0;
+    color: #333;
+    background: #fff;
+    font: 17px/1.4 "Trebuchet MS", Verdana, sans-serif;
+  }
+  .w2 a {
+    color: #0063dc;
+  }
+  .w2-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 14px 34px 0;
+    border-bottom: 4px solid #6aa7e0;
+    background: linear-gradient(#f7fbff, #dcebfa);
+  }
+  .w2-logo {
+    padding-bottom: 12px;
+    color: #0063dc;
+    font: bold 34px/1 "Trebuchet MS", sans-serif;
+    letter-spacing: -1px;
+  }
+  .w2-logo span {
+    color: #e6007a;
+  }
+  .w2-logo sup {
+    margin-left: 6px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #fff;
+    background: #f57300;
+    font-size: 12px;
+    letter-spacing: 0;
+    vertical-align: 14px;
+  }
+  .w2-head nav {
+    display: flex;
+    gap: 4px;
+  }
+  .w2-head nav a {
+    padding: 9px 18px;
+    border-radius: 9px 9px 0 0;
+    color: #1a5aa6;
+    background: linear-gradient(#fff, #cfe2f6);
+    font-weight: bold;
+    text-decoration: none;
+  }
+  .w2-head nav a.is-on {
+    color: #fff;
+    background: linear-gradient(#8cc0f2, #3d87d6 50%, #2c78cb 51%, #5aa0e6);
+  }
+  .w2-hero {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 22px 34px 16px;
+  }
+  .w2-copy {
+    flex: 1;
+  }
+  .w2-h {
+    margin: 0 0 10px;
+    color: #222;
+    font: bold 40px/1.08 "Trebuchet MS", sans-serif;
+    letter-spacing: -1.5px;
+  }
+  .w2-h em {
+    color: #e6007a;
+    font-style: normal;
+  }
+  .w2-dek {
+    max-width: 500px;
+    margin: 0 0 18px;
+    color: #555;
+  }
+  .w2-ctas {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .w2 .w2-btn {
+    padding: 11px 26px;
+    border: 1px solid #3b8c17;
+    border-radius: 22px;
+    color: #fff;
+    background: linear-gradient(#9fe36b, #5cb82e 50%, #4aa61f 51%, #79cc45);
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0.7),
+      0 2px 4px rgba(0, 0, 0, 0.2);
+    font-weight: bold;
+    text-decoration: none;
+    text-shadow: 0 -1px #3b8c17;
+  }
+  .w2-portrait {
+    position: relative;
+    flex: none;
+    width: 200px;
+    height: 200px;
+  }
+  .w2-portrait img {
+    display: block;
+    width: 172px;
+    height: 172px;
+    margin-left: auto;
+    border: 5px solid #fff;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    object-fit: cover;
+    transform: rotate(-3deg);
+  }
+  .w2-badge {
+    position: absolute;
+    bottom: 0;
+    left: -14px;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    width: 98px;
+    height: 98px;
+    margin: 0;
+    border-radius: 50%;
+    color: #fff;
+    background: radial-gradient(
+      circle at 35% 30%,
+      #ffb347,
+      #f57300 60%,
+      #d95800
+    );
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    transform: rotate(10deg);
+  }
+  .w2-badge b {
+    font-size: 24px;
+    line-height: 1;
+  }
+  .w2-badge span {
+    width: 86px;
+    font-size: 11px;
+    line-height: 1.2;
+  }
+  .w2-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 0;
+    padding: 2px 34px 20px;
+    list-style: none;
+  }
+  .w2-cards a {
+    display: grid;
+    gap: 2px;
+    height: 100%;
+    padding: 12px 16px;
+    border: 1px solid #c9dcf0;
+    border-radius: 10px;
+    background: linear-gradient(#fff, #eef5fc);
+    text-decoration: none;
+  }
+  .w2-cards b {
+    color: #0063dc;
+    font-size: 34px;
+    line-height: 1;
+  }
+  .w2-lbl {
+    color: #333;
+  }
+  .w2-co {
+    color: #707070;
+    font-size: 14px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .w2-head nav a:not(.is-on):hover {
+      background: linear-gradient(#fff, #b9d5f2);
+    }
+    .w2 .w2-btn:hover {
+      filter: brightness(1.08);
+    }
+    .w2-cards a:hover {
+      border-color: #6aa7e0;
+      background: linear-gradient(#fff, #e2eefb);
+    }
+  }
+</style>
