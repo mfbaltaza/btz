@@ -1,0 +1,50 @@
+---
+import XpBrowser from "./XpBrowser.astro";
+import { workEntries } from "../../data/work";
+const clients = workEntries.filter((w) => w.kind === "client");
+---
+
+<XpBrowser title="juan's weblog">
+  <div class="bl">
+    <header class="bl-head">
+      <h1>juan's weblog</h1>
+      <p>notes from a software engineer who wants the web to feel good</p>
+    </header>
+    <div class="bl-cols">
+      <main>
+        <p class="date">Sunday, October 11, 2026</p>
+        <h2>Looking for my next team</h2>
+        <p>I’m a software engineer who builds payment flows, analytics dashboards and fast CMS sites. Most recently I doubled weekly releases at PagosWOW. If your team cares about craft and ownership, I’d love to hear from you.</p>
+        <p class="meta">posted by Juan at 10:05 PM · <a href="mailto:hello@juan-araujo.com">email me</a> · <a href="#story">read the full story »</a></p>
+      </main>
+      <aside>
+        <h3>About me</h3>
+        <div class="me"><img src="/pp4.jpg" alt="" /><span><b>Juan Araujo</b><br />Frontend &amp; product</span></div>
+        <h3>Work archive</h3>
+        <ul>{clients.map((w) => (<li><a href="#work">{w.name}</a> <small>{w.years}</small></li>))}</ul>
+        <h3>Links</h3>
+        <ul><li><a href="https://linkedin.com/in/baltaza">LinkedIn</a></li><li><a href="https://drive.google.com/file/d/1_VD7rlEnLHo750ggmAMi31mfKWgwJpu1/view?usp=sharing">My CV (PDF)</a></li></ul>
+      </aside>
+    </div>
+  </div>
+</XpBrowser>
+
+<style>
+  .bl { display: flex; flex-direction: column; color: #333; background: #f3efe6; font: 17px/1.5 Georgia, "Times New Roman", serif; }
+  .bl-head { padding: 18px 34px 14px; color: #fff; background: #5a3e2b; border-bottom: 5px solid #c8743a; }
+  .bl-head h1 { margin: 0; font: italic 38px/1 Georgia, serif; letter-spacing: -1px; }
+  .bl-head p { margin: 4px 0 0; font: 15px "Trebuchet MS", sans-serif; color: #e9d6c3; }
+  .bl-cols { flex: 1; display: flex; gap: 26px; padding: 18px 34px; }
+  main { flex: 1; }
+  .date { margin: 0 0 6px; font: bold 13px "Trebuchet MS", sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #a0603a; }
+  h2 { margin: 0 0 8px; font: 30px/1.1 Georgia, serif; color: #2b1d13; }
+  main p { margin: 0 0 12px; }
+  .meta { padding-top: 8px; border-top: 1px dotted #b9a68f; font: 14px "Trebuchet MS", sans-serif; color: #7a6a5a; }
+  a { color: #b2522a; }
+  aside { width: 250px; font: 15px/1.45 "Trebuchet MS", sans-serif; }
+  h3 { margin: 0 0 6px; padding-bottom: 3px; border-bottom: 1px solid #c8b49b; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: #5a3e2b; }
+  .me { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; }
+  .me img { width: 56px; height: 56px; object-fit: cover; border: 3px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+  ul { margin: 0 0 14px; padding: 0; list-style: none; }
+  li small { color: #9a8a7a; }
+</style>
