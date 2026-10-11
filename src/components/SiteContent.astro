@@ -1,0 +1,328 @@
+---
+// SiteContent — a mid-2000s personal weblog shown through the Monitor's
+// Screen, inside Internet Explorer on Windows XP. Laid out on the Screen's
+// fixed 960×576 canvas, which renders at roughly half size on the Glass, so
+// type is sized to stay readable there. Work entries come from data/work.ts.
+import { workEntries } from "../data/work";
+
+const clients = workEntries.filter((w) => w.kind === "client");
+const cvUrl =
+  "https://drive.google.com/file/d/1_VD7rlEnLHo750ggmAMi31mfKWgwJpu1/view?usp=sharing";
+// Dated when the page renders, so the latest post always reads as current.
+const postDate = new Date().toLocaleDateString("en-US", {
+  weekday: "long",
+  month: "long",
+  day: "numeric",
+  year: "numeric",
+});
+---
+
+<div class="xp">
+  <div class="xp-title" aria-hidden="true">
+    <span class="xp-ie">e</span>
+    <span class="xp-title-text">juan's weblog - Microsoft Internet Explorer</span>
+    <span class="xp-btns"><i>_</i><i>□</i><i class="xp-close">×</i></span>
+  </div>
+  <div class="xp-bar" aria-hidden="true">
+    <span>◀ Back</span><span class="xp-dim">▶</span>
+    <span class="xp-dim">Address</span>
+    <span class="xp-addr"><b>e</b> http://www.juanaraujo.com/</span>
+    <span class="xp-go">➜ Go</span>
+  </div>
+
+  <div class="bl">
+    <header class="bl-head">
+      <p class="bl-name">juan's weblog</p>
+      <p class="bl-tag">
+        notes from a software engineer who wants the web to feel good
+      </p>
+    </header>
+
+    <div class="bl-cols">
+      <div class="bl-posts">
+        <article>
+          <p class="bl-date">{postDate}</p>
+          <p class="bl-title">Looking for my next team</p>
+          <p>
+            I’m a software engineer who builds payment flows, analytics
+            dashboards and fast CMS sites. Most recently I doubled weekly
+            releases at PagosWOW. If your team cares about craft and ownership,
+            I’d love to hear from you.
+          </p>
+          <p class="bl-meta">
+            posted by Juan · <a href="mailto:hello@juan-araujo.com">email me</a>
+            · <a href="#story">read the full story »</a>
+          </p>
+        </article>
+        <article class="bl-older">
+          <p class="bl-title">What I care about</p>
+          <p>
+            Hierarchy, natural interactions, performance, and the question
+            behind the feature. Good software gets out of the way.
+          </p>
+        </article>
+      </div>
+
+      <aside class="bl-side">
+        <p class="bl-h">About me</p>
+        <div class="bl-me">
+          <img src="/juan.jpg" alt="Juan Araujo" width="320" height="320" />
+          <span><b>Juan Araujo</b><br />Frontend &amp; product</span>
+        </div>
+        <p class="bl-h">Work archive</p>
+        <ul>
+          {
+            clients.map((w) => (
+              <li>
+                <a href="#work">{w.name}</a> <small>{w.years}</small>
+              </li>
+            ))
+          }
+        </ul>
+        <p class="bl-h">Links</p>
+        <ul>
+          <li>
+            <a href="https://linkedin.com/in/baltaza" target="_blank" rel="noopener"
+              >LinkedIn<span class="visually-hidden"> (opens in a new tab)</span
+              ></a
+            >
+          </li>
+          <li>
+            <a href={cvUrl} target="_blank" rel="noopener"
+              >My CV (PDF)<span class="visually-hidden">
+                (opens in a new tab)</span
+              ></a
+            >
+          </li>
+        </ul>
+      </aside>
+    </div>
+  </div>
+
+  <div class="xp-status" aria-hidden="true">
+    <span>Done</span><span class="xp-zone">Internet</span>
+  </div>
+</div>
+
+<style>
+  /* ---- Windows XP / Internet Explorer chrome ---- */
+  .xp {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    color: #000;
+    background: #ece9d8;
+    font: 15px/1.2 Tahoma, "Segoe UI", Verdana, sans-serif;
+    text-align: left;
+  }
+  .xp *,
+  .xp *::before,
+  .xp *::after {
+    box-sizing: border-box;
+  }
+  .xp-title {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 8px;
+    height: 34px;
+    padding: 0 6px 0 10px;
+    color: #fff;
+    background: linear-gradient(
+      #0a5fd8 0%,
+      #3d95ff 9%,
+      #0058e6 18%,
+      #0050d8 70%,
+      #0045b8 100%
+    );
+    font-size: 16px;
+    font-weight: bold;
+    text-shadow: 1px 1px #0a246a;
+  }
+  .xp-ie {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    color: #1d6fd8;
+    background: #fff;
+    font: bold 16px/1 Georgia, serif;
+    text-shadow: none;
+  }
+  .xp-title-text {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .xp-btns {
+    display: flex;
+    gap: 3px;
+  }
+  .xp-btns i {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border: 1px solid #fff;
+    border-radius: 4px;
+    background: linear-gradient(#5d9cfb, #2763dd);
+    font-size: 14px;
+    font-style: normal;
+  }
+  .xp-btns .xp-close {
+    background: linear-gradient(#e8835f, #c73b1a);
+  }
+  .xp-bar {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 12px;
+    height: 38px;
+    padding: 0 10px;
+    border-bottom: 1px solid #aca899;
+  }
+  .xp-dim {
+    color: #6d6d6d;
+  }
+  .xp-addr {
+    flex: 1;
+    overflow: hidden;
+    padding: 4px 8px;
+    border: 1px solid #7f9db9;
+    background: #fff;
+    white-space: nowrap;
+  }
+  .xp-addr b {
+    color: #1d6fd8;
+    font-family: Georgia, serif;
+  }
+  .xp-go {
+    color: #1e7d1e;
+  }
+  .xp-status {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: space-between;
+    height: 26px;
+    padding: 0 10px;
+    border-top: 1px solid #aca899;
+    color: #333;
+    font-size: 13px;
+  }
+  .xp-zone {
+    padding-left: 12px;
+    border-left: 1px solid #aca899;
+  }
+
+  /* ---- The weblog ---- */
+  .bl {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    color: #333;
+    background: #f3efe6;
+    font: 17px/1.5 Georgia, "Times New Roman", serif;
+  }
+  .bl a {
+    color: #a64a22;
+  }
+  .bl p {
+    margin: 0;
+  }
+  .bl-head {
+    padding: 16px 34px 12px;
+    border-bottom: 5px solid #c8743a;
+    color: #fff;
+    background: #5a3e2b;
+  }
+  .bl-name {
+    font: italic 38px/1 Georgia, serif;
+    letter-spacing: -1px;
+  }
+  .bl-tag {
+    margin-top: 4px !important;
+    color: #eadbcb;
+    font: 15px "Trebuchet MS", sans-serif;
+  }
+  .bl-cols {
+    display: flex;
+    flex: 1;
+    gap: 28px;
+    min-height: 0;
+    padding: 16px 34px;
+  }
+  .bl-posts {
+    flex: 1;
+  }
+  .bl-date {
+    margin-bottom: 4px !important;
+    color: #9a5632;
+    font: bold 13px "Trebuchet MS", sans-serif;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .bl-title {
+    margin-bottom: 6px !important;
+    color: #2b1d13;
+    font: 30px/1.1 Georgia, serif;
+  }
+  .bl-meta {
+    margin-top: 10px !important;
+    padding-top: 8px;
+    border-top: 1px dotted #b9a68f;
+    color: #6e5e4e;
+    font: 14px "Trebuchet MS", sans-serif;
+  }
+  .bl-older {
+    margin-top: 18px;
+  }
+  .bl-older .bl-title {
+    font-size: 22px;
+  }
+  .bl-side {
+    width: 250px;
+    font: 15px/1.45 "Trebuchet MS", sans-serif;
+  }
+  .bl-h {
+    margin-bottom: 6px !important;
+    padding-bottom: 3px;
+    border-bottom: 1px solid #c8b49b;
+    color: #5a3e2b;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .bl-me {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .bl-me img {
+    width: 60px;
+    height: 60px;
+    border: 3px solid #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    object-fit: cover;
+  }
+  .bl-side ul {
+    margin: 0 0 12px;
+    padding: 0;
+    list-style: none;
+  }
+  .bl-side small {
+    color: #85735f;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .bl a:hover {
+      color: #5a3e2b;
+      background: #ead9c3;
+    }
+  }
+</style>
