@@ -1,19 +1,26 @@
 ---
-// SiteContent — the mid-2000s "Web 2.0" homepage shown through the Monitor's
+// SiteContent — a mid-2000s personal weblog shown through the Monitor's
 // Screen, inside Internet Explorer on Windows XP. Laid out on the Screen's
 // fixed 960×576 canvas, which renders at roughly half size on the Glass, so
-// type is sized to stay readable there. Results come from data/work.ts.
+// type is sized to stay readable there. Work entries come from data/work.ts.
 import { workEntries } from "../data/work";
 
-const highlights = workEntries.filter((w) => w.outcomes?.length).slice(0, 3);
+const clients = workEntries.filter((w) => w.kind === "client");
 const cvUrl =
   "https://drive.google.com/file/d/1_VD7rlEnLHo750ggmAMi31mfKWgwJpu1/view?usp=sharing";
+// Dated when the page renders, so the latest post always reads as current.
+const postDate = new Date().toLocaleDateString("en-US", {
+  weekday: "long",
+  month: "long",
+  day: "numeric",
+  year: "numeric",
+});
 ---
 
 <div class="xp">
   <div class="xp-title" aria-hidden="true">
     <span class="xp-ie">e</span>
-    <span class="xp-title-text">Juan Araujo - Microsoft Internet Explorer</span>
+    <span class="xp-title-text">juan's weblog - Microsoft Internet Explorer</span>
     <span class="xp-btns"><i>_</i><i>□</i><i class="xp-close">×</i></span>
   </div>
   <div class="xp-bar" aria-hidden="true">
@@ -23,57 +30,73 @@ const cvUrl =
     <span class="xp-go">➜ Go</span>
   </div>
 
-  <div class="w2">
-    <header class="w2-head">
-      <div class="w2-logo">juan<span>araujo</span><sup>beta</sup></div>
-      <nav aria-label="Monitor site">
-        <a class="is-on" href="#top" aria-current="page">Home</a><a href="#work"
-          >Work</a
-        ><a href="#story">About</a><a href="mailto:hello@juan-araujo.com"
-          >Contact</a
-        >
-      </nav>
+  <div class="bl">
+    <header class="bl-head">
+      <p class="bl-name">juan's weblog</p>
+      <p class="bl-tag">
+        notes from a software engineer who wants the web to feel good
+      </p>
     </header>
 
-    <section class="w2-hero">
-      <div class="w2-copy">
-        <p class="w2-h">
-          I build web products<br />people <em>enjoy</em> using.
-        </p>
-        <p class="w2-dek">
-          Software engineer, frontend &amp; product. Payment flows, analytics
-          dashboards and fast CMS sites.
-        </p>
-        <div class="w2-ctas">
-          <a class="w2-btn" href="mailto:hello@juan-araujo.com">Hire Juan »</a>
-          <a class="w2-link" href={cvUrl} target="_blank" rel="noopener"
-            >Download CV (PDF)<span class="visually-hidden">
-              (opens in a new tab)</span
-            ></a
-          >
-        </div>
+    <div class="bl-cols">
+      <div class="bl-posts">
+        <article>
+          <p class="bl-date">{postDate}</p>
+          <p class="bl-title">Looking for my next team</p>
+          <p>
+            I’m a software engineer who builds payment flows, analytics
+            dashboards and fast CMS sites. Most recently I doubled weekly
+            releases at PagosWOW. If your team cares about craft and ownership,
+            I’d love to hear from you.
+          </p>
+          <p class="bl-meta">
+            posted by Juan · <a href="mailto:hello@juan-araujo.com">email me</a>
+            · <a href="#story">read the full story »</a>
+          </p>
+        </article>
+        <article class="bl-older">
+          <p class="bl-title">What I care about</p>
+          <p>
+            Hierarchy, natural interactions, performance, and the question
+            behind the feature. Good software gets out of the way.
+          </p>
+        </article>
       </div>
-      <div class="w2-portrait">
-        <img src="/juan.jpg" alt="Juan Araujo" width="320" height="320" />
-        <p class="w2-badge"><b>Open</b><span>to the right team</span></p>
-      </div>
-    </section>
 
-    <ul class="w2-cards" aria-label="Results">
-      {
-        highlights.map((w) => (
+      <aside class="bl-side">
+        <p class="bl-h">About me</p>
+        <div class="bl-me">
+          <img src="/juan.jpg" alt="Juan Araujo" width="320" height="320" />
+          <span><b>Juan Araujo</b><br />Frontend &amp; product</span>
+        </div>
+        <p class="bl-h">Work archive</p>
+        <ul>
+          {
+            clients.map((w) => (
+              <li>
+                <a href="#work">{w.name}</a> <small>{w.years}</small>
+              </li>
+            ))
+          }
+        </ul>
+        <p class="bl-h">Links</p>
+        <ul>
           <li>
-            <a href="#work">
-              <b>{w.outcomes![0].value}</b>
-              <span class="w2-lbl">{w.outcomes![0].label}</span>
-              <span class="w2-co">
-                {w.name} · {w.years}
-              </span>
-            </a>
+            <a href="https://linkedin.com/in/baltaza" target="_blank" rel="noopener"
+              >LinkedIn<span class="visually-hidden"> (opens in a new tab)</span
+              ></a
+            >
           </li>
-        ))
-      }
-    </ul>
+          <li>
+            <a href={cvUrl} target="_blank" rel="noopener"
+              >My CV (PDF)<span class="visually-hidden">
+                (opens in a new tab)</span
+              ></a
+            >
+          </li>
+        </ul>
+      </aside>
+    </div>
   </div>
 
   <div class="xp-status" aria-hidden="true">
@@ -195,190 +218,111 @@ const cvUrl =
     border-left: 1px solid #aca899;
   }
 
-  /* ---- The page itself ---- */
-  .w2 {
+  /* ---- The weblog ---- */
+  .bl {
+    display: flex;
     flex: 1;
+    flex-direction: column;
     min-height: 0;
     color: #333;
-    background: #fff;
-    font: 17px/1.4 "Trebuchet MS", Verdana, sans-serif;
+    background: #f3efe6;
+    font: 17px/1.5 Georgia, "Times New Roman", serif;
   }
-  .w2 a {
-    color: #0063dc;
+  .bl a {
+    color: #a64a22;
   }
-  .w2-head {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    padding: 14px 34px 0;
-    border-bottom: 4px solid #6aa7e0;
-    background: linear-gradient(#f7fbff, #dcebfa);
+  .bl p {
+    margin: 0;
   }
-  .w2-logo {
-    padding-bottom: 12px;
-    color: #0063dc;
-    font: bold 34px/1 "Trebuchet MS", sans-serif;
+  .bl-head {
+    padding: 16px 34px 12px;
+    border-bottom: 5px solid #c8743a;
+    color: #fff;
+    background: #5a3e2b;
+  }
+  .bl-name {
+    font: italic 38px/1 Georgia, serif;
     letter-spacing: -1px;
   }
-  .w2-logo span {
-    color: #e6007a;
+  .bl-tag {
+    margin-top: 4px !important;
+    color: #eadbcb;
+    font: 15px "Trebuchet MS", sans-serif;
   }
-  .w2-logo sup {
-    margin-left: 6px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    color: #fff;
-    background: #f57300;
-    font-size: 12px;
-    letter-spacing: 0;
-    vertical-align: 14px;
-  }
-  .w2-head nav {
+  .bl-cols {
     display: flex;
-    gap: 4px;
+    flex: 1;
+    gap: 28px;
+    min-height: 0;
+    padding: 16px 34px;
   }
-  .w2-head nav a {
-    padding: 9px 18px;
-    border-radius: 9px 9px 0 0;
-    color: #1a5aa6;
-    background: linear-gradient(#fff, #cfe2f6);
-    font-weight: bold;
-    text-decoration: none;
-  }
-  .w2-head nav a.is-on {
-    color: #fff;
-    background: linear-gradient(#8cc0f2, #3d87d6 50%, #2c78cb 51%, #5aa0e6);
-  }
-  .w2-hero {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    padding: 22px 34px 16px;
-  }
-  .w2-copy {
+  .bl-posts {
     flex: 1;
   }
-  .w2-h {
-    margin: 0 0 10px;
-    color: #222;
-    font: bold 40px/1.08 "Trebuchet MS", sans-serif;
-    letter-spacing: -1.5px;
+  .bl-date {
+    margin-bottom: 4px !important;
+    color: #9a5632;
+    font: bold 13px "Trebuchet MS", sans-serif;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
-  .w2-h em {
-    color: #e6007a;
-    font-style: normal;
+  .bl-title {
+    margin-bottom: 6px !important;
+    color: #2b1d13;
+    font: 30px/1.1 Georgia, serif;
   }
-  .w2-dek {
-    max-width: 500px;
-    margin: 0 0 18px;
-    color: #555;
+  .bl-meta {
+    margin-top: 10px !important;
+    padding-top: 8px;
+    border-top: 1px dotted #b9a68f;
+    color: #6e5e4e;
+    font: 14px "Trebuchet MS", sans-serif;
   }
-  .w2-ctas {
+  .bl-older {
+    margin-top: 18px;
+  }
+  .bl-older .bl-title {
+    font-size: 22px;
+  }
+  .bl-side {
+    width: 250px;
+    font: 15px/1.45 "Trebuchet MS", sans-serif;
+  }
+  .bl-h {
+    margin-bottom: 6px !important;
+    padding-bottom: 3px;
+    border-bottom: 1px solid #c8b49b;
+    color: #5a3e2b;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .bl-me {
     display: flex;
+    gap: 10px;
     align-items: center;
-    gap: 20px;
+    margin-bottom: 12px;
   }
-  .w2 .w2-btn {
-    padding: 11px 26px;
-    border: 1px solid #3b8c17;
-    border-radius: 22px;
-    color: #fff;
-    background: linear-gradient(#9fe36b, #5cb82e 50%, #4aa61f 51%, #79cc45);
-    box-shadow: inset 0 1px rgba(255, 255, 255, 0.7),
-      0 2px 4px rgba(0, 0, 0, 0.2);
-    font-weight: bold;
-    text-decoration: none;
-    text-shadow: 0 -1px #3b8c17;
-  }
-  .w2-portrait {
-    position: relative;
-    flex: none;
-    width: 200px;
-    height: 200px;
-  }
-  .w2-portrait img {
-    display: block;
-    width: 172px;
-    height: 172px;
-    margin-left: auto;
-    border: 5px solid #fff;
-    border-radius: 12px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+  .bl-me img {
+    width: 60px;
+    height: 60px;
+    border: 3px solid #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     object-fit: cover;
-    transform: rotate(-3deg);
   }
-  .w2-badge {
-    position: absolute;
-    bottom: 0;
-    left: -14px;
-    display: grid;
-    place-items: center;
-    align-content: center;
-    width: 98px;
-    height: 98px;
-    margin: 0;
-    border-radius: 50%;
-    color: #fff;
-    background: radial-gradient(
-      circle at 35% 30%,
-      #ffb347,
-      #f57300 60%,
-      #d95800
-    );
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
-    text-align: center;
-    transform: rotate(10deg);
-  }
-  .w2-badge b {
-    font-size: 24px;
-    line-height: 1;
-  }
-  .w2-badge span {
-    width: 86px;
-    font-size: 11px;
-    line-height: 1.2;
-  }
-  .w2-cards {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin: 0;
-    padding: 2px 34px 20px;
+  .bl-side ul {
+    margin: 0 0 12px;
+    padding: 0;
     list-style: none;
   }
-  .w2-cards a {
-    display: grid;
-    gap: 2px;
-    height: 100%;
-    padding: 12px 16px;
-    border: 1px solid #c9dcf0;
-    border-radius: 10px;
-    background: linear-gradient(#fff, #eef5fc);
-    text-decoration: none;
-  }
-  .w2-cards b {
-    color: #0063dc;
-    font-size: 34px;
-    line-height: 1;
-  }
-  .w2-lbl {
-    color: #333;
-  }
-  .w2-co {
-    color: #707070;
-    font-size: 14px;
+  .bl-side small {
+    color: #85735f;
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .w2-head nav a:not(.is-on):hover {
-      background: linear-gradient(#fff, #b9d5f2);
-    }
-    .w2 .w2-btn:hover {
-      filter: brightness(1.08);
-    }
-    .w2-cards a:hover {
-      border-color: #6aa7e0;
-      background: linear-gradient(#fff, #e2eefb);
+    .bl a:hover {
+      color: #5a3e2b;
+      background: #ead9c3;
     }
   }
 </style>
