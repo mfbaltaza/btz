@@ -1,9 +1,11 @@
 ---
-// Selected Work — editorial index of case studies and hobby projects.
+// Selected Work — editorial index of case studies, launched products (as
+// plates, see ProductShowcase.astro) and hobby projects.
 // Items invert on hover — title row and description as one block; the
 // description stays collapsed until hover/focus (always visible on touch
 // devices that can't hover).
 import { workEntries } from "../data/work";
+import ProductShowcase from "./ProductShowcase.astro";
 
 const client = workEntries.filter((e) => e.kind === "client");
 const hobby = workEntries.filter((e) => e.kind === "hobby");
@@ -21,34 +23,37 @@ const hobby = workEntries.filter((e) => e.kind === "hobby");
       { label: "Work", items: client },
       { label: "Tinkering with", items: hobby },
     ].map((group) => (
-      <div class="work-group">
-        <h3 class="work-group-label">{group.label}</h3>
-        <div class="work-band" aria-hidden="true" />
-        <ol class="work-list">
-          {group.items.map((entry, i) => (
-            <li>
-              <a
-                href="#"
-                class="work-row"
-                aria-label={`${entry.name} — ${entry.role}`}
-              >
-                <span class="row-num">{String(i + 1).padStart(2, "0")}</span>
-                <span class="row-title">{entry.name}</span>
-                <span class="row-role">{entry.role}</span>
-                <span class="row-years">{entry.years}</span>
-                <span class="row-arrow" aria-hidden="true">
-                  ↗
-                </span>
-              </a>
-              <div class="row-blurb">
-                <div class="row-blurb-clip">
-                  <p>{entry.blurb}</p>
+      <>
+        {group.items === hobby && <ProductShowcase />}
+        <div class="work-group">
+          <h3 class="work-group-label">{group.label}</h3>
+          <div class="work-band" aria-hidden="true" />
+          <ol class="work-list">
+            {group.items.map((entry, i) => (
+              <li>
+                <a
+                  href="#"
+                  class="work-row"
+                  aria-label={`${entry.name} — ${entry.role}`}
+                >
+                  <span class="row-num">{String(i + 1).padStart(2, "0")}</span>
+                  <span class="row-title">{entry.name}</span>
+                  <span class="row-role">{entry.role}</span>
+                  <span class="row-years">{entry.years}</span>
+                  <span class="row-arrow" aria-hidden="true">
+                    ↗
+                  </span>
+                </a>
+                <div class="row-blurb">
+                  <div class="row-blurb-clip">
+                    <p>{entry.blurb}</p>
+                  </div>
                 </div>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </>
     ))
   }
 </section>
@@ -92,7 +97,8 @@ const hobby = workEntries.filter((e) => e.kind === "hobby");
     margin: 0 auto;
     position: relative;
   }
-  .work-group + .work-group {
+  .work-group + .work-group,
+  :global(.launch) + .work-group {
     margin-top: 9vh;
   }
   .work-group-label {
