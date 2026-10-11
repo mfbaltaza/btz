@@ -1,6 +1,6 @@
 # btz — Portfolio Editorial + 3D Display
 
-A personal portfolio where an editorial hero page frames a 3D-rendered CRT display that hosts a period-faithful 2005 site.
+A personal portfolio where an editorial hero page frames a 3D-rendered CRT display that hosts a mid-2000s personal weblog.
 
 ## Language
 
@@ -27,7 +27,7 @@ The SVG overlay and distortion copies that simulate scanlines, phosphor, vignett
 _Avoid_: effects, glitches, noise
 
 **SiteContent**:
-The 2005-period DOM (`LegacyPage`) shown *through* Screen; intentionally left faithful and not redesigned.
+The mid-2000s personal weblog (`SiteContent`), shown in Internet Explorer on Windows XP *through* Screen. Laid out on a fixed 960×576 canvas that renders at about half size on Glass, so type stays large.
 _Avoid_: site, legacy, inner page
 
 **Idle Drift**:

@@ -87,6 +87,6 @@ export const workEntries: WorkEntry[] = [
     years: "2025",
     stack: ["Three.js", "Astro"],
     blurb:
-      "This very site: an editorial page framing a 3D-rendered CRT that hosts a period-faithful 2005 website through a homography-projected screen.",
+      "This very site: an editorial page framing a 3D-rendered CRT that hosts a mid-2000s personal weblog through a homography-projected screen.",
   },
 ];
