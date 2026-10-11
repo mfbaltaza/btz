@@ -1,0 +1,677 @@
+---
+// Launched — the side products that are live, shown as two cards inside
+// Selected Work. Each card pairs a dark plate (the products' own pages are
+// near-black) with an editorial caption in the site's paper/ink voice, and
+// links out to the live landing page.
+//
+// The plate is a product shot drawn in markup that explains the product in
+// one short sequence: it plays once when the card scrolls into view, then
+// rests on its final frame. The final frame is the default styling, so with
+// JS off or reduced motion the plate is simply a still of that frame.
+import { workEntries } from "../data/work";
+
+const products = workEntries.filter((e) => e.kind === "product");
+const dictated = "Ship both landing pages tonight, then write the changelog.";
+// Resting heights for the waveform bars — deterministic, so SSR is stable.
+const bars = Array.from({ length: 14 }, (_, b) =>
+  (0.25 + 0.75 * Math.abs(Math.sin(b * 1.9 + 0.4))).toFixed(2)
+);
+---
+
+<div class="launch">
+  <h3 class="launch-label">Launched</h3>
+  <ul class="launch-grid">
+    {
+      products.map((p) => (
+        <li>
+          <a class="launch-card" href={p.url} target="_blank" rel="noopener">
+            <div class="plate" data-plate aria-hidden="true">
+              {p.id === "allowme" ? (
+                <div class="am">
+                  <div class="win">
+                    <div class="win-bar">
+                      <i />
+                      <i />
+                      <i />
+                      <span>notes.md</span>
+                    </div>
+                    <div class="win-body">
+                      <p class="ln ln-dim">## Friday</p>
+                      <p class="ln ln-dim">- review the landing copy</p>
+                      <p class="ln ln-typed">
+                        {dictated.split(" ").map((w, i) => (
+                          <>
+                            {i > 0 && " "}
+                            <span class="w" style={`--i:${i}`}>
+                              {w}
+                            </span>
+                          </>
+                        ))}
+                        <span class="caret" />
+                      </p>
+                    </div>
+                  </div>
+                  <div class="hud">
+                    <span class="hud-key">hold</span>
+                    <span class="hud-wave">
+                      {bars.map((h, b) => (
+                        <i style={`--h:${h};--b:${b}`} />
+                      ))}
+                    </span>
+                    <span class="hud-label">
+                      <span class="hud-now">Listening</span>
+                      <span class="hud-done">Typed</span>
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div class="lp">
+                  <div class="rec">
+                    <span class="rec-badge">
+                      <span class="rec-now">
+                        <i /> REC 0:42
+                      </span>
+                      <span class="rec-done">Recorded · 0:42</span>
+                    </span>
+                    <div class="rec-page">
+                      <span />
+                      <span />
+                      <span />
+                      <span />
+                    </div>
+                  </div>
+                  <div class="trim">
+                    <span class="trim-sel" />
+                    <span class="trim-h trim-h-l">
+                      <i />
+                    </span>
+                    <span class="trim-h trim-h-r">
+                      <i />
+                    </span>
+                  </div>
+                  <div class="toast">
+                    <span class="toast-check">✓</span> Link copied
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div class="cap">
+              <p class="cap-name">{p.name}</p>
+              <p class="cap-tag">{p.tagline}</p>
+              <p class="cap-blurb">{p.blurb}</p>
+              <p class="cap-foot">
+                <span>{[p.years, ...p.stack].join(" · ")}</span>
+                <span class="cap-cta">
+                  Visit site{" "}
+                  <span class="cap-arrow" aria-hidden="true">
+                    ↗
+                  </span>
+                </span>
+              </p>
+              <span class="visually-hidden"> (opens in a new tab)</span>
+            </div>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  .launch {
+    max-width: 1000px;
+    margin: 9vh auto 0;
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+    --plate: #0b0b0c;
+    --plate-raised: #161618;
+    --plate-line: rgba(255, 255, 255, 0.09);
+    --plate-ink: #f2efe9;
+    --plate-soft: #8d8982;
+    --rec: #e5484d;
+    --trim: #f2c94c;
+  }
+  .launch-label {
+    font: 11px var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 10px;
+    margin: 0 0 28px;
+    font-weight: 400;
+  }
+  .launch-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 40px 28px;
+  }
+  .launch-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    color: inherit;
+    text-decoration: none;
+  }
+  .launch-card:focus-visible {
+    outline: 2px solid var(--accent-ink);
+    outline-offset: 6px;
+  }
+
+  /* ---- Plate ---- */
+  .plate {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    container-type: inline-size;
+    background: radial-gradient(
+        110% 80% at 50% 0%,
+        #1d1d20 0%,
+        var(--plate) 70%
+      ),
+      var(--plate);
+    color: var(--plate-ink);
+    font-family: var(--mono);
+    transition: transform 160ms var(--ease-out);
+  }
+  .plate::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0 0 1px var(--plate-line);
+    pointer-events: none;
+  }
+
+  /* allowme — an editor, a dictation HUD, words landing at the cursor. */
+  .am {
+    position: absolute;
+    inset: 9% 9% 0;
+  }
+  .win {
+    height: 100%;
+    border: 1px solid var(--plate-line);
+    border-bottom: 0;
+    border-radius: 2cqw 2cqw 0 0;
+    background: var(--plate-raised);
+  }
+  .win-bar {
+    display: flex;
+    align-items: center;
+    gap: 1.2cqw;
+    height: 7.5cqw;
+    padding: 0 2.6cqw;
+    border-bottom: 1px solid var(--plate-line);
+    font-size: 2.3cqw;
+    color: var(--plate-soft);
+  }
+  .win-bar i {
+    width: 1.6cqw;
+    height: 1.6cqw;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.14);
+  }
+  .win-bar span {
+    margin-left: 1.4cqw;
+  }
+  .win-body {
+    padding: 4cqw 5cqw;
+    font-size: 3.1cqw;
+    line-height: 1.6;
+  }
+  .ln {
+    margin: 0 0 1.2cqw;
+  }
+  .ln-dim {
+    color: var(--plate-soft);
+  }
+  .ln-typed {
+    margin-top: 3cqw;
+    color: var(--plate-ink);
+  }
+  .w {
+    display: inline-block;
+  }
+  .caret {
+    display: inline-block;
+    width: 0.45cqw;
+    height: 1.15em;
+    vertical-align: -0.2em;
+    background: var(--rec);
+    animation: caret 1.1s steps(1) infinite;
+  }
+  .hud {
+    position: absolute;
+    left: 50%;
+    bottom: 8cqw;
+    display: flex;
+    align-items: center;
+    gap: 2.4cqw;
+    padding: 1.6cqw 3cqw 1.6cqw 1.6cqw;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    background: #222225;
+    box-shadow: 0 2cqw 6cqw rgba(0, 0, 0, 0.55);
+    font-size: 2.5cqw;
+    white-space: nowrap;
+    translate: -50% 0;
+  }
+  .hud-key {
+    padding: 0.9cqw 1.8cqw;
+    border-radius: 1.2cqw;
+    background: linear-gradient(#3a3a3e, #2a2a2d);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 0.5cqw 0 #111;
+    color: var(--plate-ink);
+    letter-spacing: 0.04em;
+  }
+  .hud-wave {
+    display: flex;
+    align-items: center;
+    gap: 0.6cqw;
+    height: 4.4cqw;
+  }
+  .hud-wave i {
+    width: 0.55cqw;
+    height: 100%;
+    border-radius: 1cqw;
+    background: var(--plate-ink);
+    transform: scaleY(calc(var(--h) * 0.35));
+  }
+  .hud-label {
+    display: grid;
+    color: var(--plate-soft);
+  }
+  .hud-label > span {
+    grid-area: 1 / 1;
+  }
+  .hud-now {
+    opacity: 0;
+  }
+
+  /* Looped — a recording stops, the clip is trimmed, the link is copied. */
+  .lp {
+    position: absolute;
+    inset: 9% 11% 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3.2cqw;
+  }
+  .rec {
+    position: relative;
+    flex: none;
+    aspect-ratio: 16 / 9;
+    border-radius: 1.6cqw;
+    background: var(--plate-raised);
+    box-shadow: 0 0 0 1px var(--plate-line);
+  }
+  .rec-badge {
+    position: absolute;
+    top: 2.6cqw;
+    left: 3cqw;
+    display: grid;
+    font-size: 2.4cqw;
+    letter-spacing: 0.06em;
+  }
+  .rec-badge > span {
+    grid-area: 1 / 1;
+    display: flex;
+    align-items: center;
+    gap: 1.2cqw;
+  }
+  .rec-now {
+    opacity: 0;
+  }
+  .rec-now i {
+    width: 1.6cqw;
+    height: 1.6cqw;
+    border-radius: 50%;
+    background: var(--rec);
+  }
+  .rec-done {
+    color: var(--plate-soft);
+  }
+  .rec-page {
+    position: absolute;
+    inset: 30% 14% 12%;
+    display: grid;
+    align-content: start;
+    gap: 2cqw;
+    padding: 3cqw;
+    border-radius: 1cqw;
+    background: #202023;
+  }
+  .rec-page span {
+    height: 1.4cqw;
+    border-radius: 1cqw;
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .rec-page span:nth-child(1) {
+    width: 46%;
+    height: 2.4cqw;
+    background: rgba(255, 255, 255, 0.22);
+  }
+  .rec-page span:nth-child(3) {
+    width: 78%;
+  }
+  .rec-page span:nth-child(4) {
+    width: 58%;
+  }
+  .trim {
+    position: relative;
+    height: 6cqw;
+    border-radius: 1cqw;
+    background: repeating-linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.1) 0 1px,
+        transparent 1px 2.2cqw
+      ),
+      #141416;
+  }
+  .trim-sel {
+    position: absolute;
+    inset: 0;
+    border-top: 0.5cqw solid var(--trim);
+    border-bottom: 0.5cqw solid var(--trim);
+    background: rgba(242, 201, 76, 0.1);
+    clip-path: inset(0 26% 0 18%);
+  }
+  /* Each handle rides a full-width rail so translate % is a share of the
+     track, not of the handle. */
+  .trim-h {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .trim-h i {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1.6cqw;
+    background: var(--trim);
+  }
+  .trim-h-l {
+    transform: translateX(18%);
+  }
+  .trim-h-l i {
+    left: 0;
+    border-radius: 1cqw 0 0 1cqw;
+  }
+  .trim-h-r {
+    transform: translateX(-26%);
+  }
+  .trim-h-r i {
+    right: 0;
+    border-radius: 0 1cqw 1cqw 0;
+  }
+  .toast {
+    align-self: center;
+    display: flex;
+    align-items: center;
+    gap: 1.4cqw;
+    padding: 1.8cqw 3.4cqw;
+    border-radius: 999px;
+    background: var(--plate-ink);
+    color: var(--plate);
+    font-size: 2.6cqw;
+    box-shadow: 0 2cqw 6cqw rgba(0, 0, 0, 0.5);
+  }
+  .toast-check {
+    color: #2f8f4e;
+  }
+
+  /* ---- The sequence ----
+     Default styles above are the final frame. [data-armed] snaps everything
+     to the first frame (no transition); [data-playing] lets each piece
+     transition back to its final frame on its own delay. */
+  .plate[data-armed] *,
+  .plate[data-armed] {
+    transition: none !important;
+  }
+  .plate[data-armed] .hud {
+    opacity: 0;
+    transform: translateY(4cqw) scale(0.96);
+  }
+  .plate[data-armed] .w {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateY(0.6cqw);
+  }
+  .plate[data-armed] .hud-now,
+  .plate[data-armed] .rec-now {
+    opacity: 1;
+  }
+  .plate[data-armed] .hud-done,
+  .plate[data-armed] .rec-done {
+    opacity: 0;
+    filter: blur(2px);
+  }
+  .plate[data-armed] .rec {
+    box-shadow: 0 0 0 1px var(--rec), 0 0 0 0.6cqw rgba(229, 72, 77, 0.25);
+  }
+  .plate[data-armed] .trim-sel {
+    clip-path: inset(0 0 0 0);
+  }
+  .plate[data-armed] .trim-h-l,
+  .plate[data-armed] .trim-h-r {
+    transform: none;
+  }
+  .plate[data-armed] .toast {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+
+  /* allowme: HUD up (0ms) → words land (500ms on) → label settles (2.1s). */
+  .plate[data-playing] .hud {
+    transition: opacity 260ms var(--ease-out), transform 260ms var(--ease-out);
+  }
+  .plate[data-playing] .hud-key {
+    animation: key-hold 2100ms var(--ease-out) both;
+  }
+  .plate[data-playing] .hud-wave i {
+    animation: talk 300ms ease-in-out calc(200ms + var(--b) * -60ms) 6 alternate;
+  }
+  .plate[data-playing] .w {
+    transition: opacity 300ms var(--ease-out), filter 300ms var(--ease-out),
+      transform 300ms var(--ease-out);
+    transition-delay: calc(500ms + var(--i) * 140ms);
+  }
+  .plate[data-playing] .hud-now,
+  .plate[data-playing] .hud-done {
+    transition: opacity 200ms ease, filter 200ms ease;
+    transition-delay: 2100ms;
+  }
+
+  /* Looped: recording (0–1.4s) → stop → trim (1.5s) → link copied (2.1s). */
+  .plate[data-playing] .rec-now i {
+    animation: blink 700ms steps(1) 2;
+  }
+  .plate[data-playing] .rec {
+    transition: box-shadow 200ms ease 1400ms;
+  }
+  .plate[data-playing] .rec-now,
+  .plate[data-playing] .rec-done {
+    transition: opacity 200ms ease 1400ms, filter 200ms ease 1400ms;
+  }
+  .plate[data-playing] .trim-sel {
+    transition: clip-path 520ms var(--ease-in-out) 1500ms;
+  }
+  .plate[data-playing] .trim-h-l,
+  .plate[data-playing] .trim-h-r {
+    transition: transform 520ms var(--ease-in-out) 1500ms;
+  }
+  .plate[data-playing] .toast {
+    transition: opacity 300ms var(--ease-out) 2150ms,
+      transform 300ms var(--ease-out) 2150ms;
+  }
+
+  /* ---- Caption ---- */
+  .cap {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding-top: 22px;
+    font-family: var(--serif);
+  }
+  .cap-name {
+    margin: 0;
+    font: clamp(2rem, 3.6vw, 3rem) / 1 var(--serif);
+    letter-spacing: -0.035em;
+  }
+  .cap-tag {
+    margin: 6px 0 12px;
+    font: italic clamp(1.05rem, 1.5vw, 1.25rem) / 1.3 var(--serif);
+  }
+  .cap-blurb {
+    margin: 0 0 22px;
+    max-width: 440px;
+    font: 14px/21px var(--serif);
+    color: var(--ink-soft);
+  }
+  .cap-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    margin: auto 0 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--rule);
+    font: 11px var(--mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .cap-cta {
+    flex: none;
+    color: var(--accent-ink);
+  }
+  .cap-arrow {
+    display: inline-block;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .cap-name {
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.14em;
+      text-decoration-color: transparent;
+      transition: text-decoration-color 160ms ease;
+    }
+    .cap-arrow {
+      transition: transform 160ms var(--ease-out);
+    }
+    .launch-card:hover .cap-name {
+      text-decoration-color: currentColor;
+    }
+    .launch-card:hover .cap-arrow {
+      transform: translate(2px, -2px);
+    }
+  }
+  /* Press feedback on the whole card, felt through the plate. */
+  .launch-card:active .plate {
+    transform: scale(0.985);
+  }
+
+  /* Cards enter together with a short stagger when the group scrolls in. */
+  .launch-grid[data-armed] li {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  .launch-grid li {
+    transition: opacity var(--enter-duration) var(--enter-easing),
+      transform var(--enter-duration) var(--enter-easing);
+  }
+  .launch-grid li:nth-child(2) {
+    transition-delay: 60ms;
+  }
+
+  @keyframes caret {
+    50% {
+      opacity: 0;
+    }
+  }
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+  @keyframes talk {
+    from {
+      transform: scaleY(calc(var(--h) * 0.35));
+    }
+    to {
+      transform: scaleY(var(--h));
+    }
+  }
+  @keyframes key-hold {
+    0%,
+    100% {
+      transform: none;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 0.5cqw 0 #111;
+    }
+    8%,
+    92% {
+      transform: translateY(0.4cqw);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 0.1cqw 0 #111;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .launch-grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 56px;
+    }
+  }
+  /* Reduced motion: the script never arms the sequence, so plates show their
+     final frame; only the caret's blink and press scale would move. */
+  @media (prefers-reduced-motion: reduce) {
+    .caret {
+      animation: none;
+    }
+    .plate {
+      transition: none;
+    }
+    .launch-card:active .plate {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  // Play each plate's sequence once, the first time its card scrolls into
+  // view. Arming (snapping to the first frame) happens only when we can
+  // actually play it, so nothing is ever hidden without a way back.
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const grid = document.querySelector<HTMLElement>(".launch-grid");
+
+  if (grid && !reduced && "IntersectionObserver" in window) {
+    const plates = [...grid.querySelectorAll<HTMLElement>("[data-plate]")];
+    grid.setAttribute("data-armed", "");
+    plates.forEach((p) => p.setAttribute("data-armed", ""));
+
+    const play = (plate: HTMLElement) => {
+      void plate.offsetWidth; // commit the first frame before releasing it
+      plate.removeAttribute("data-armed");
+      plate.setAttribute("data-playing", "");
+    };
+
+    const io = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          io.unobserve(e.target);
+          if (e.target === grid) {
+            grid.removeAttribute("data-armed");
+            return;
+          }
+          // Let the card finish arriving before its plate starts talking.
+          setTimeout(() => play(e.target as HTMLElement), 250);
+        }),
+      { rootMargin: "0px 0px -20% 0px" }
+    );
+    io.observe(grid);
+    plates.forEach((p) => io.observe(p));
+  }
+</script>

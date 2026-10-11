@@ -6,6 +6,7 @@
 import { workEntries } from "../data/work";
 
 const clients = workEntries.filter((w) => w.kind === "client");
+const [allowme, looped] = workEntries.filter((w) => w.kind === "product");
 const cvUrl =
   "https://drive.google.com/file/d/1_VD7rlEnLHo750ggmAMi31mfKWgwJpu1/view?usp=sharing";
 // Dated when the page renders, so the latest post always reads as current.
@@ -52,6 +53,21 @@ const postDate = new Date().toLocaleDateString("en-US", {
           <p class="bl-meta">
             posted by Juan · <a href="mailto:hello@juan-araujo.com">email me</a>
             · <a href="#story">read the full story »</a>
+          </p>
+        </article>
+        <article class="bl-older">
+          <p class="bl-title">Two side projects, live</p>
+          <p>
+            <a href={allowme.url} target="_blank" rel="noopener"
+              >{allowme.name}<span class="visually-hidden">
+                (opens in a new tab)</span
+              ></a
+            >, dictation for Linux, and
+            <a href={looped.url} target="_blank" rel="noopener"
+              >{looped.name}<span class="visually-hidden">
+                (opens in a new tab)</span
+              ></a
+            >, screen recording with a link.
           </p>
         </article>
         <article class="bl-older">
@@ -279,7 +295,7 @@ const postDate = new Date().toLocaleDateString("en-US", {
     font: 14px "Trebuchet MS", sans-serif;
   }
   .bl-older {
-    margin-top: 18px;
+    margin-top: 12px;
   }
   .bl-older .bl-title {
     font-size: 22px;

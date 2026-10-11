@@ -1,10 +1,10 @@
 /*
- * Selected Work entries — case studies + hobby projects shown in
- * WorkSection.astro on /. Client entries mirror the CV — keep them factual;
+ * Selected Work entries — case studies, launched side products and hobby
+ * projects shown in WorkSection.astro on /. Client entries mirror the CV — keep them factual;
  * no invented companies, stacks or numbers.
  */
 
-export type WorkKind = "client" | "hobby";
+export type WorkKind = "client" | "product" | "hobby";
 
 export interface WorkOutcome {
   value: string;
@@ -20,6 +20,9 @@ export interface WorkEntry {
   stack: string[];
   blurb: string;
   outcomes?: WorkOutcome[];
+  /* Products only: the live landing page and a one-line pitch. */
+  url?: string;
+  tagline?: string;
 }
 
 export const workEntries: WorkEntry[] = [
@@ -78,6 +81,30 @@ export const workEntries: WorkEntry[] = [
       { value: "-40%", label: "Support tickets" },
       { value: "+30%", label: "Account-balance usage" },
     ],
+  },
+  {
+    id: "allowme",
+    kind: "product",
+    name: "allowme",
+    role: "Everything",
+    years: "2026",
+    stack: ["Linux", "Whisper", "Gemma"],
+    url: "https://allowme-landing.vercel.app",
+    tagline: "Push-to-talk dictation for Linux.",
+    blurb:
+      "Hold a key, speak, and cleaned-up text is typed where your cursor is. Speech recognition and clean-up run locally: no cloud, no account, no subscription.",
+  },
+  {
+    id: "looped",
+    kind: "product",
+    name: "Looped",
+    role: "Everything",
+    years: "2026",
+    stack: ["Self-hosted", "Plain files"],
+    url: "https://looped-landing.vercel.app",
+    tagline: "Record your screen, share a link.",
+    blurb:
+      "A small self-hosted app that records your screen, trims it and shares a link. Everything is stored as plain files, with no database.",
   },
   {
     id: "crt-site",
